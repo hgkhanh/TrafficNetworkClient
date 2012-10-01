@@ -5,5 +5,9 @@
     <string name="menu_settings">Settings</string>
     <string name="title_activity_main">Main</string>
     <string name="title_activity_traffic_map">TrafficMapActivity</string>
+    <string name="latitude">Latitude : </string>
+    <string name="longitude">Longitude : </string>
+    <string name="accuracy">Accuracy : </string>
+    <string name="provider">Provider : </string>
 
 </resources>
