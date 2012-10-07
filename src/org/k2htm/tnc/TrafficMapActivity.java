@@ -1,16 +1,22 @@
 package org.k2htm.tnc;
 
+import java.io.DataInputStream;
+import java.io.FileInputStream;
 import java.util.List;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +34,11 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 	private GeoPoint currentPoint;
 	private Location currentLocation = null;
 	private TrafficOverlay currPos;
+	private Button btnReport;
+	public static final int REQUEST_CODE = 1;
+	public static final String TAG = "Traffic Map";
+	public static final String LONG = "longitude";
+	public static final String LAT = "latitude";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -42,20 +53,27 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 		getLastLocation();
 		animateToCurrentLocation();
 		drawCurrPositionOverlay();
-		drawMalls();
+		// set button listener
+		btnReport = (Button) findViewById(R.id.btnReport);
+		btnReport.setOnClickListener(new OnClickListener() {
+
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				Bundle oBundle = new Bundle();
+				oBundle.putInt(LAT, currentPoint.getLatitudeE6());
+				oBundle.putInt(LONG, currentPoint.getLongitudeE6());
+				Intent oIntent = new Intent(TrafficMapActivity.this,
+						ReportMapActivity.class);
+				oIntent.putExtras(oBundle);
+				startActivityForResult(oIntent, REQUEST_CODE);
+			}
+		});
+
 	}
 
 	public void getLastLocation() {
 		String provider = getBestProvider();
 		currentLocation = locationManager.getLastKnownLocation(provider);
-		/*
-		 * The next 4 lines are used to hardcode our location If you wish to get
-		 * your current location remember to comment or remove them
-		 */
-		currentPoint = new GeoPoint(29647929, -82352486);
-		currentLocation = new Location("");
-		currentLocation.setLatitude(currentPoint.getLatitudeE6() / 1e6);
-		currentLocation.setLongitude(currentPoint.getLongitudeE6() / 1e6);
 		if (currentLocation != null) {
 			setCurrentLocation(currentLocation);
 		} else {
@@ -83,24 +101,9 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 	}
 
 	public void setCurrentLocation(Location location) {
-		/*
-		 * int currLatitude = (int) (location.getLatitude()*1E6); int
-		 * currLongitude = (int) (location.getLongitude()*1E6); currentPoint =
-		 * new GeoPoint(currLatitude,currLongitude);
-		 */
-		/*
-		 * ======================================================================
-		 * ================== /*The Above Code displays your correct current
-		 * location, but for the sake of the demo I will be hard coding your
-		 * current location to the University of Florida, to get your real
-		 * current location, comment or delete the line of code below and
-		 * uncomment the code above.
-		 */
-
-		currentPoint = new GeoPoint(29647929, -82352486);
-		currentLocation = new Location("");
-		currentLocation.setLatitude(currentPoint.getLatitudeE6() / 1e6);
-		currentLocation.setLongitude(currentPoint.getLongitudeE6() / 1e6);
+		int currLatitude = (int) (location.getLatitude() * 1E6);
+		int currLongitude = (int) (location.getLongitude() * 1E6);
+		currentPoint = new GeoPoint(currLatitude, currLongitude);
 
 		((TextView) findViewById(R.id.latitudeText)).setText("Latitude : "
 				+ String.valueOf((int) (currentLocation.getLatitude() * 1E6)));
@@ -129,37 +132,73 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 		}
 	}
 
-	
-	public void drawMalls(){
-	    Drawable marker = getResources().getDrawable(R.drawable.incidents);
-	    TrafficOverlay mallsPos = new TrafficOverlay(marker,mapView);
-	        GeoPoint[] mallCoords = new GeoPoint[6];
-	        //Load Some Random Coordinates in Miami, FL
-	        mallCoords[0] = new GeoPoint(29656582,-82411151);//The Oaks Mall
-	        mallCoords[1] = new GeoPoint(29649831,-82376347);//Creekside mall
-	        mallCoords[2] = new GeoPoint(29674146,-8238905);//Millhopper Shopping Center
-	        mallCoords[3] = new GeoPoint(29675078,-82322617);//Northside Shopping Center
-	        mallCoords[4] = new GeoPoint(29677017,-82339761);//Gainesville Mall
-	        mallCoords[5] = new GeoPoint(29663835,-82325599);//Gainesville Shopping Center
-	        List<Overlay> overlays = mapView.getOverlays();
-	    OverlayItem overlayItem = new OverlayItem(mallCoords[0], "The Oaks Mall", "6419 W Newberry Rd, Gainesville, FL 32605");
-	    mallsPos.addOverlay(overlayItem);
-	    overlayItem = new OverlayItem(mallCoords[1], "Creekside Mall", "3501 Southwest 2nd Avenue, Gainesville, FL");
-	    mallsPos.addOverlay(overlayItem);
-	    overlayItem = new OverlayItem(mallCoords[2], "Millhopper Shopping Center", "NW 43rd St & NW 16th Blvd. Gainesville, FL");
-	    mallsPos.addOverlay(overlayItem);
-	    overlayItem = new OverlayItem(mallCoords[3], "Northside Shopping Center", "Gainesville, FL");
-	    mallsPos.addOverlay(overlayItem);
-	    overlayItem = new OverlayItem(mallCoords[4], "Gainesville Mall", "2624 Northwest 13th Street Gainesville, FL 32609-2834");
-	    mallsPos.addOverlay(overlayItem);
-	    overlayItem = new OverlayItem(mallCoords[5], "Gainesville Shopping Center", "1344 N Main St Gainesville, Florida 32601");
-	    mallsPos.addOverlay(overlayItem);
-	    overlays.add(mallsPos);
-	    mallsPos.setCurrentLocation(currentLocation);
+	public void drawMalls() {
+		Drawable marker = getResources().getDrawable(R.drawable.incidents);
+		TrafficOverlay mallsPos = new TrafficOverlay(marker, mapView);
+		GeoPoint[] mallCoords = new GeoPoint[6];
+		// Load Some Random Coordinates in Miami, FL
+		mallCoords[0] = new GeoPoint(21027664, 10583955);// The Oaks Mall
+		mallCoords[1] = new GeoPoint(21029864, 105824955);// Creekside mall
+		mallCoords[2] = new GeoPoint(21021964, 105823955);// Millhopper Shopping
+															// Center
+		mallCoords[3] = new GeoPoint(21023964, 105802155);// Northside Shopping
+															// Center
+		mallCoords[4] = new GeoPoint(21021964, 105813955);// Gainesville Mall
+		mallCoords[5] = new GeoPoint(21020864, 105803955);// Gainesville
+															// Shopping Center
+		List<Overlay> overlays = mapView.getOverlays();
+		/*
+		 * OverlayItem overlayItem = new OverlayItem(mallCoords[0],
+		 * "The Oaks Mall", "6419 W Newberry Rd, Gainesville, FL 32605");
+		 * mallsPos.addOverlay(overlayItem); overlayItem = new
+		 * OverlayItem(mallCoords[1], "Creekside Mall",
+		 * "3501 Southwest 2nd Avenue, Gainesville, FL");
+		 * mallsPos.addOverlay(overlayItem); overlayItem = new
+		 * OverlayItem(mallCoords[2], "Millhopper Shopping Center",
+		 * "NW 43rd St & NW 16th Blvd. Gainesville, FL");
+		 * mallsPos.addOverlay(overlayItem); overlayItem = new
+		 * OverlayItem(mallCoords[3], "Northside Shopping Center",
+		 * "Gainesville, FL"); mallsPos.addOverlay(overlayItem); overlayItem =
+		 * new OverlayItem(mallCoords[4], "Gainesville Mall",
+		 * "2624 Northwest 13th Street Gainesville, FL 32609-2834");
+		 * mallsPos.addOverlay(overlayItem); overlayItem = new
+		 * OverlayItem(mallCoords[5], "Gainesville Shopping Center",
+		 * "1344 N Main St Gainesville, Florida 32601");
+		 */
+
+		/*
+		 * read from file
+		 */
+		FileInputStream fis;
+		Log.i(TAG, "read file");
+		try {
+			fis = openFileInput("incidents.txt");
+			DataInputStream dataIO = new DataInputStream(fis);
+			String strLine = null;
+			int tmp_lat;
+			int tmp_long;
+			while ((strLine = dataIO.readLine()) != null) {
+				tmp_lat = Integer.parseInt(strLine);
+				Log.i(TAG, "stored string:" + strLine);
+				strLine = dataIO.readLine();
+				tmp_long = Integer.parseInt(strLine);
+				Log.i(TAG, "stored string:" + strLine);
+				OverlayItem overlayItem = new OverlayItem(new GeoPoint(tmp_lat,
+						tmp_long), "Saved Point", "you selected this before");
+				mallsPos.addOverlay(overlayItem);
+			}
+
+			dataIO.close();
+			fis.close();
+
+		} catch (Exception e) {
+		}
+
+		overlays.add(mallsPos);
+		mallsPos.setCurrentLocation(currentLocation);
+
 	}
-	
-	
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_traffic_map, menu);
@@ -198,6 +237,8 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 		super.onResume();
 		locationManager
 				.requestLocationUpdates(getBestProvider(), 1000, 1, this);
+
+		drawMalls();
 	}
 
 	@Override

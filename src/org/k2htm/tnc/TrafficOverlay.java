@@ -72,7 +72,7 @@ public class TrafficOverlay extends BalloonItemizedOverlay<OverlayItem> {
 		Toast.makeText(
 				mContext,
 				"long : " + p.getLongitudeE6() + "  | lat : "
-						+ p.getLatitudeE6(), Toast.LENGTH_SHORT).show();
+						+ p.getLatitudeE6(), 500).show();
 
 		return super.onTap(p, mapView);
 	}
