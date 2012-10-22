@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.view.MotionEvent;
 import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
@@ -58,7 +57,7 @@ public class TrafficOverlay extends BalloonItemizedOverlay<OverlayItem> {
 		Toast.makeText(mContext, tmp, Toast.LENGTH_LONG).show();
 		return true;
 	}
-
+   
 	public Location convertGpToLoc(GeoPoint gp) {
 		Location convertedLocation = new Location("");
 		convertedLocation.setLatitude(gp.getLatitudeE6() / 1e6);

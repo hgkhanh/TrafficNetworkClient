@@ -104,18 +104,15 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 		int currLatitude = (int) (location.getLatitude() * 1E6);
 		int currLongitude = (int) (location.getLongitude() * 1E6);
 		currentPoint = new GeoPoint(currLatitude, currLongitude);
-
+  
 		((TextView) findViewById(R.id.latitudeText)).setText("Latitude : "
 				+ String.valueOf((int) (currentLocation.getLatitude() * 1E6)));
 		((TextView) findViewById(R.id.longitudeText)).setText("Longitude : "
 				+ String.valueOf((int) (currentLocation.getLongitude() * 1E6)));
 		((TextView) findViewById(R.id.accuracyText)).setText("Accuracy : "
 				+ String.valueOf(location.getAccuracy()) + " m");
-		drawCurrPositionOverlay();
-	}
 
-	public void centerToCurrentLocation(View view) {
-		animateToCurrentLocation();
+		drawCurrPositionOverlay();
 	}
 
 	public void drawCurrPositionOverlay() {
