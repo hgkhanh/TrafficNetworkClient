@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent"
+    tools:context=".ReportMapActivity" >
 
     <com.google.android.maps.MapView
         android:id="@+id/map"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:apiKey="0pO5vO6nJAsxxgnLPOYMa17bBcfkVtyWfPbC8PA"
-        android:clickable="true" />
+        android:clickable="true" 
+        style="@style/mapViewStyle"/>
 
     <ImageView
         android:id="@+id/drag"
@@ -85,7 +88,8 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:gravity="right" >
+            android:gravity="right"
+            android:orientation="vertical" >
 
             <Button
                 android:id="@+id/btnConfirm"
@@ -93,6 +97,14 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="2sp"
                 android:text="Confirm" />
+
+            <Spinner
+                android:id="@+id/spn_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="2sp"
+                android:entries="@array/incident_type_arrays"
+                android:prompt="@string/incident_type_prompt" />
         </LinearLayout>
     </LinearLayout>
 

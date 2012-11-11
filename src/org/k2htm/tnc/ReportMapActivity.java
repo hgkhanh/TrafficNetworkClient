@@ -1,10 +1,12 @@
 package org.k2htm.tnc;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +23,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,9 +37,10 @@ import com.google.android.maps.OverlayItem;
 public class ReportMapActivity extends MapActivity {
 	private MapView map = null;
 	private GeoPoint currentPoint;
-	private MyLocationOverlay me = null;  
+	private MyLocationOverlay me = null;
 	private Button btnConfirm;
 	private TextView tvLat, tvLong;
+	private Spinner spnType;
 	public static final String TAG = "ReportMapActivity";
 
 	@Override
@@ -51,15 +55,29 @@ public class ReportMapActivity extends MapActivity {
 		tvLat.setText(String.valueOf((int) (currentPoint.getLatitudeE6())));
 		tvLong = ((TextView) findViewById(R.id.longitudeText));
 		tvLong.setText(String.valueOf((int) (currentPoint.getLongitudeE6())));
+		spnType = (Spinner) findViewById(R.id.spn_type);
 		// set button listener
 		btnConfirm.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
-				Log.i(TAG, "Click confirm " + (tvLat.getText().toString())
-						+ " " + tvLong.getText().toString());
+
+				switch (spnType.getSelectedItemPosition()) {
+				case 0:
+
+					break;
+				case 1:
+				default:
+					break;
+				}
+				Log.i(TAG,
+						"spinner select : " + spnType.getSelectedItemPosition()
+								+ "Click confirm "
+								+ (tvLat.getText().toString()) + " "
+								+ tvLong.getText().toString());
 				writeToFile(Integer.parseInt(tvLat.getText().toString()),
-						Integer.parseInt((tvLong.getText().toString())));
+						Integer.parseInt((tvLong.getText().toString())),
+						spnType.getSelectedItemPosition());
 			}
 		});
 
@@ -235,10 +253,11 @@ public class ReportMapActivity extends MapActivity {
 				+ "\nlong:" + iBundle.getInt(TrafficMapActivity.LONG));
 	}
 
-	private void writeToFile(int latitude, int longitude) {
+	private void writeToFile(int latitude, int longitude, int type) {
 		Log.i(TAG, "asdf");
 		try { // catches IOException below
-			String outputString = new String(latitude + "\n" + longitude);
+			String outputString = new String(latitude + "\n" + longitude + "\n"
+					+ type);
 
 			// ##### Write a file to the disk #####
 			/*
@@ -247,18 +266,22 @@ public class ReportMapActivity extends MapActivity {
 			 * security-reasons. We chose MODE_WORLD_READABLE, because we have
 			 * nothing to hide in our file
 			 */
+			String filePath = this.getFilesDir().getPath().toString() + "/incidents.txt";
+			File file = new File(filePath);
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			FileWriter filewriter = new FileWriter(file);
 
-			FileOutputStream fOut = openFileOutput("incidents.txt",
-					MODE_WORLD_READABLE);
-			OutputStreamWriter osw = new OutputStreamWriter(fOut);
-
+			BufferedWriter wr = new BufferedWriter(filewriter);
 			// Write the string to the file
-			osw.write(outputString);
+			wr.write(outputString);
 			/*
 			 * ensure that everything is really written out and close
 			 */
-			osw.flush();
-			osw.close();
+			wr.flush();
+			wr.close();
+			Log.i("reaport","write :" + outputString);
 			Toast.makeText(ReportMapActivity.this,
 					"Reported point :" + latitude + " " + longitude,
 					Toast.LENGTH_SHORT).show();

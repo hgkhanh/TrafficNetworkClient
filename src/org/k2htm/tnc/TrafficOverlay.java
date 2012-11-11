@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
@@ -15,6 +16,7 @@ import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 
 public class TrafficOverlay extends BalloonItemizedOverlay<OverlayItem> {
 	private Context mContext;
+	public static final String TAG = "Traffic Overlay";
 	private ArrayList<OverlayItem> incidents = new ArrayList<OverlayItem>();
 	private Location currentLocation;
 
@@ -23,10 +25,12 @@ public class TrafficOverlay extends BalloonItemizedOverlay<OverlayItem> {
 		// TODO Auto-generated constructor stub
 		boundCenterBottom(defaultMarker);
 		mContext = mapView.getContext();
+		populate();
 	}
 
 	public void setCurrentLocation(Location loc) {
 		this.currentLocation = loc;
+		Log.i(TAG,"set currentLocation:" + currentLocation.toString());
 	}
 
 	@Override
@@ -48,31 +52,28 @@ public class TrafficOverlay extends BalloonItemizedOverlay<OverlayItem> {
 
 	@Override
 	protected boolean onBalloonTap(int index, OverlayItem item) {
-		String tmp = incidents.get(index).getTitle();
-		GeoPoint mallPoint = incidents.get(index).getPoint();
-		Location tmpLoc = convertGpToLoc(mallPoint);
-		double distance = ((currentLocation).distanceTo(tmpLoc)) * (0.001);
-		DecimalFormat df = new DecimalFormat("#.##");
-		tmp = tmp + " is " + String.valueOf(df.format(distance)) + " km away.";
-		Toast.makeText(mContext, tmp, Toast.LENGTH_LONG).show();
+		
+		//CACULATE DISTANCE
+//		String tmp = incidents.get(index).getTitle();
+//		GeoPoint incidentPoint = incidents.get(index).getPoint();		
+//		Location tmpLoc = convertGpToLoc(incidentPoint);
+//		Log.i(TAG,"incidentPoint toString():" + incidentPoint.toString());
+//		Log.i(TAG,"currentLocation toString():" + currentLocation.toString());
+//	
+//		double distance = ((currentLocation).distanceTo(tmpLoc)) * (0.001);
+//		Log.i(TAG,"incidentPoint toString():" + incidentPoint.toString());
+//		DecimalFormat df = new DecimalFormat("#.##");
+//		tmp = tmp + " is " + String.valueOf(df.format(distance)) + " km away.";
+//		Toast.makeText(mContext, tmp, Toast.LENGTH_LONG).show();
 		return true;
 	}
-   
-	public Location convertGpToLoc(GeoPoint gp) {
+
+	
+	public static Location convertGpToLoc(GeoPoint gp) {
 		Location convertedLocation = new Location("");
 		convertedLocation.setLatitude(gp.getLatitudeE6() / 1e6);
 		convertedLocation.setLongitude(gp.getLongitudeE6() / 1e6);
 		return convertedLocation;
 	}
 
-	@Override
-	public boolean onTap(GeoPoint p, MapView mapView) {
-		// TODO Auto-generated method stub
-		Toast.makeText(
-				mContext,
-				"long : " + p.getLongitudeE6() + "  | lat : "
-						+ p.getLatitudeE6(), 500).show();
-
-		return super.onTap(p, mapView);
-	}
 }

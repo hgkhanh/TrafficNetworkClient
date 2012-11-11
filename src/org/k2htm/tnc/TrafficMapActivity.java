@@ -1,7 +1,10 @@
 package org.k2htm.tnc;
 
-import java.io.DataInputStream;
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 
 import android.content.Context;
@@ -35,10 +38,13 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 	private Location currentLocation = null;
 	private TrafficOverlay currPos;
 	private Button btnReport;
-	public static final int REQUEST_CODE = 1;
+	public static final int REQUEST_CODE = 100;
 	public static final String TAG = "Traffic Map";
 	public static final String LONG = "longitude";
 	public static final String LAT = "latitude";
+	public static final int TRAFFIC_JAM_CODE = 0;
+	public static final int ACCIDENT_CODE = 1;
+	public static final int BLOCKED_CODE = 2;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -74,12 +80,16 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 	public void getLastLocation() {
 		String provider = getBestProvider();
 		currentLocation = locationManager.getLastKnownLocation(provider);
-		if (currentLocation != null) {
-			setCurrentLocation(currentLocation);
-		} else {
-			Toast.makeText(this, "Location not yet acquired", Toast.LENGTH_LONG)
-					.show();
+		if (currentLocation == null) {
+
+			currentLocation = TrafficOverlay.convertGpToLoc(new GeoPoint(
+					21027555, 105849538));
+			Toast.makeText(
+					this,
+					"Location not yet acquired.Set to default location : (21.027555;105.849538)",
+					Toast.LENGTH_LONG).show();
 		}
+		setCurrentLocation(currentLocation);
 		((TextView) findViewById(R.id.providerText)).setText("Provider :"
 				+ getBestProvider());
 	}
@@ -98,13 +108,26 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 		criteria.setAccuracy(Criteria.ACCURACY_FINE);
 		String bestProvider = locationManager.getBestProvider(criteria, true);
 		return bestProvider;
-	}
+	}  
+
+	// public void setCurrentLocation() {
+	// currentPoint = new GeoPoint(21027555, 105849538);
+	//
+	// ((TextView) findViewById(R.id.latitudeText)).setText("Latitude : "
+	// + String.valueOf((int) (currentPoint.getLatitudeE6())));
+	// ((TextView) findViewById(R.id.longitudeText)).setText("Longitude : "
+	// + String.valueOf((int) (currentPoint.getLongitudeE6())));
+	// ((TextView) findViewById(R.id.accuracyText)).setText("Accuracy : "
+	// + String.valueOf("N/A"));
+	//
+	// drawCurrPositionOverlay();
+	// }
 
 	public void setCurrentLocation(Location location) {
 		int currLatitude = (int) (location.getLatitude() * 1E6);
 		int currLongitude = (int) (location.getLongitude() * 1E6);
 		currentPoint = new GeoPoint(currLatitude, currLongitude);
-  
+
 		((TextView) findViewById(R.id.latitudeText)).setText("Latitude : "
 				+ String.valueOf((int) (currentLocation.getLatitude() * 1E6)));
 		((TextView) findViewById(R.id.longitudeText)).setText("Longitude : "
@@ -118,7 +141,7 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 	public void drawCurrPositionOverlay() {
 		List<Overlay> overlays = mapView.getOverlays();
 		overlays.remove(currPos);
-		Drawable marker = getResources().getDrawable(R.drawable.me);
+		Drawable marker = getResources().getDrawable(R.drawable.icon_you);
 		currPos = new TrafficOverlay(marker, mapView);
 		if (currentPoint != null) {
 			OverlayItem overlayitem = new OverlayItem(currentPoint, "Me",
@@ -129,71 +152,76 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 		}
 	}
 
-	public void drawMalls() {
-		Drawable marker = getResources().getDrawable(R.drawable.incidents);
-		TrafficOverlay mallsPos = new TrafficOverlay(marker, mapView);
-		GeoPoint[] mallCoords = new GeoPoint[6];
-		// Load Some Random Coordinates in Miami, FL
-		mallCoords[0] = new GeoPoint(21027664, 10583955);// The Oaks Mall
-		mallCoords[1] = new GeoPoint(21029864, 105824955);// Creekside mall
-		mallCoords[2] = new GeoPoint(21021964, 105823955);// Millhopper Shopping
-															// Center
-		mallCoords[3] = new GeoPoint(21023964, 105802155);// Northside Shopping
-															// Center
-		mallCoords[4] = new GeoPoint(21021964, 105813955);// Gainesville Mall
-		mallCoords[5] = new GeoPoint(21020864, 105803955);// Gainesville
-															// Shopping Center
+	public void drawIncidentOverlay() {
 		List<Overlay> overlays = mapView.getOverlays();
-		/*
-		 * OverlayItem overlayItem = new OverlayItem(mallCoords[0],
-		 * "The Oaks Mall", "6419 W Newberry Rd, Gainesville, FL 32605");
-		 * mallsPos.addOverlay(overlayItem); overlayItem = new
-		 * OverlayItem(mallCoords[1], "Creekside Mall",
-		 * "3501 Southwest 2nd Avenue, Gainesville, FL");
-		 * mallsPos.addOverlay(overlayItem); overlayItem = new
-		 * OverlayItem(mallCoords[2], "Millhopper Shopping Center",
-		 * "NW 43rd St & NW 16th Blvd. Gainesville, FL");
-		 * mallsPos.addOverlay(overlayItem); overlayItem = new
-		 * OverlayItem(mallCoords[3], "Northside Shopping Center",
-		 * "Gainesville, FL"); mallsPos.addOverlay(overlayItem); overlayItem =
-		 * new OverlayItem(mallCoords[4], "Gainesville Mall",
-		 * "2624 Northwest 13th Street Gainesville, FL 32609-2834");
-		 * mallsPos.addOverlay(overlayItem); overlayItem = new
-		 * OverlayItem(mallCoords[5], "Gainesville Shopping Center",
-		 * "1344 N Main St Gainesville, Florida 32601");
-		 */
+		// create
+		Drawable marker = getResources().getDrawable(R.drawable.indicator_jam);
+		TrafficOverlay jamPos = new TrafficOverlay(marker, mapView);
+		marker = getResources().getDrawable(R.drawable.indicator_accident);
+		TrafficOverlay accidentPos = new TrafficOverlay(marker, mapView);
+		marker = getResources().getDrawable(R.drawable.indicator_blocked);
+		TrafficOverlay blockedPos = new TrafficOverlay(marker, mapView);
 
 		/*
 		 * read from file
 		 */
-		FileInputStream fis;
+		// FileInputStream fis;
 		Log.i(TAG, "read file");
 		try {
-			fis = openFileInput("incidents.txt");
-			DataInputStream dataIO = new DataInputStream(fis);
+			// fis = openFileInput("incidents.txt");
+			String filePath = this.getFilesDir().getPath().toString()
+					+ "/incidents.txt";
+			File file = new File(filePath);
+			InputStream is = new FileInputStream(file);
+			BufferedReader reader = new BufferedReader(
+					new InputStreamReader(is));
+
 			String strLine = null;
 			int tmp_lat;
 			int tmp_long;
-			while ((strLine = dataIO.readLine()) != null) {
+			int tmp_type;
+			while ((strLine = reader.readLine()) != null) {
 				tmp_lat = Integer.parseInt(strLine);
-				Log.i(TAG, "stored string:" + strLine);
-				strLine = dataIO.readLine();
+				Log.i(TAG, "tmp_lat:" + strLine);
+				strLine = reader.readLine();
 				tmp_long = Integer.parseInt(strLine);
-				Log.i(TAG, "stored string:" + strLine);
+				Log.i(TAG, "tmp_long:" + strLine);
+				strLine = reader.readLine();
+				tmp_type = Integer.parseInt(strLine);
+				Log.i(TAG, "tmp_type:" + strLine);
 				OverlayItem overlayItem = new OverlayItem(new GeoPoint(tmp_lat,
 						tmp_long), "Saved Point", "you selected this before");
-				mallsPos.addOverlay(overlayItem);
+				// draw correct icon at that position
+				switch (tmp_type) {
+				case TrafficMapActivity.TRAFFIC_JAM_CODE:
+					jamPos.addOverlay(overlayItem);
+					break;
+				case TrafficMapActivity.ACCIDENT_CODE:
+					accidentPos.addOverlay(overlayItem);
+					break;
+				case TrafficMapActivity.BLOCKED_CODE:
+					blockedPos.addOverlay(overlayItem);
+					break;
+				default:
+					jamPos.addOverlay(overlayItem);
+					break;
+				}
+
 			}
 
-			dataIO.close();
-			fis.close();
+			reader.close();
+			is.close();
 
 		} catch (Exception e) {
 		}
-
-		overlays.add(mallsPos);
-		mallsPos.setCurrentLocation(currentLocation);
-
+		overlays.add(jamPos);
+		overlays.add(accidentPos);
+		overlays.add(blockedPos);
+		// set curent position for each overlay to caculate distance from user to point of incident
+		jamPos.setCurrentLocation(currentLocation);
+		accidentPos.setCurrentLocation(currentLocation);
+		blockedPos.setCurrentLocation(currentLocation);
+		
 	}
 
 	@Override
@@ -235,7 +263,7 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 		locationManager
 				.requestLocationUpdates(getBestProvider(), 1000, 1, this);
 
-		drawMalls();
+		drawIncidentOverlay();
 	}
 
 	@Override
