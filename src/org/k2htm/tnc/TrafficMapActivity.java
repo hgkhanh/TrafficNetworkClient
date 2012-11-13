@@ -38,6 +38,7 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 	private Location currentLocation = null;
 	private TrafficOverlay currPos;
 	private Button btnReport;
+	private TextView tvProvider;
 	public static final int REQUEST_CODE = 100;
 	public static final String TAG = "Traffic Map";
 	public static final String LONG = "longitude";
@@ -50,6 +51,9 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_traffic_map);
+		// find view
+		btnReport = (Button) findViewById(R.id.btnReport);
+		tvProvider = ((TextView) findViewById(R.id.providerText));
 		// mapview setting
 		mapView = (MapView) findViewById(R.id.mapView);
 		mapView.setBuiltInZoomControls(true);
@@ -59,8 +63,8 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 		getLastLocation();
 		animateToCurrentLocation();
 		drawCurrPositionOverlay();
+
 		// set button listener
-		btnReport = (Button) findViewById(R.id.btnReport);
 		btnReport.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View arg0) {
@@ -90,8 +94,7 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 					Toast.LENGTH_LONG).show();
 		}
 		setCurrentLocation(currentLocation);
-		((TextView) findViewById(R.id.providerText)).setText("Provider :"
-				+ getBestProvider());
+		tvProvider.setText("Provider :" + getBestProvider());
 	}
 
 	public void animateToCurrentLocation() {
@@ -108,7 +111,7 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 		criteria.setAccuracy(Criteria.ACCURACY_FINE);
 		String bestProvider = locationManager.getBestProvider(criteria, true);
 		return bestProvider;
-	}  
+	}
 
 	// public void setCurrentLocation() {
 	// currentPoint = new GeoPoint(21027555, 105849538);
@@ -217,11 +220,12 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 		overlays.add(jamPos);
 		overlays.add(accidentPos);
 		overlays.add(blockedPos);
-		// set curent position for each overlay to caculate distance from user to point of incident
+		// set curent position for each overlay to caculate distance from user
+		// to point of incident
 		jamPos.setCurrentLocation(currentLocation);
 		accidentPos.setCurrentLocation(currentLocation);
 		blockedPos.setCurrentLocation(currentLocation);
-		
+
 	}
 
 	@Override
