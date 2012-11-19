@@ -4,8 +4,10 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -30,7 +32,7 @@ public class TrafficOverlay extends BalloonItemizedOverlay<OverlayItem> {
 
 	public void setCurrentLocation(Location loc) {
 		this.currentLocation = loc;
-		Log.i(TAG,"set currentLocation:" + currentLocation.toString());
+		Log.i(TAG, "set currentLocation:" + currentLocation.toString());
 	}
 
 	@Override
@@ -52,23 +54,47 @@ public class TrafficOverlay extends BalloonItemizedOverlay<OverlayItem> {
 
 	@Override
 	protected boolean onBalloonTap(int index, OverlayItem item) {
-		
-		//CACULATE DISTANCE
-//		String tmp = incidents.get(index).getTitle();
-//		GeoPoint incidentPoint = incidents.get(index).getPoint();		
-//		Location tmpLoc = convertGpToLoc(incidentPoint);
-//		Log.i(TAG,"incidentPoint toString():" + incidentPoint.toString());
-//		Log.i(TAG,"currentLocation toString():" + currentLocation.toString());
-//	
-//		double distance = ((currentLocation).distanceTo(tmpLoc)) * (0.001);
-//		Log.i(TAG,"incidentPoint toString():" + incidentPoint.toString());
-//		DecimalFormat df = new DecimalFormat("#.##");
-//		tmp = tmp + " is " + String.valueOf(df.format(distance)) + " km away.";
-//		Toast.makeText(mContext, tmp, Toast.LENGTH_LONG).show();
+
+		// CACULATE DISTANCE
+		// String tmp = incidents.get(index).getTitle();
+		// GeoPoint incidentPoint = incidents.get(index).getPoint();
+		// Location tmpLoc = convertGpToLoc(incidentPoint);
+		// Log.i(TAG,"incidentPoint toString():" + incidentPoint.toString());
+		// Log.i(TAG,"currentLocation toString():" +
+		// currentLocation.toString());
+		//
+		// double distance = ((currentLocation).distanceTo(tmpLoc)) * (0.001);
+		// Log.i(TAG,"incidentPoint toString():" + incidentPoint.toString());
+		// DecimalFormat df = new DecimalFormat("#.##");
+		// tmp = tmp + " is " + String.valueOf(df.format(distance)) +
+		// " km away.";
+		// Toast.makeText(mContext, tmp, Toast.LENGTH_LONG).show();
+
+		// String incidentType = incidents.get(index).getTitle();
+		// if(!incidentType.equals("Me")){
+		// String incidentDes = incidents.get(index).getSnippet();
+		// GeoPoint incidentPoint = incidents.get(index).getPoint();
+		// Intent detailActIntent = new Intent(mContext, IncidentDetail.class);
+		// //Bundle : incident type , lat & long , description
+		// Bundle oBundle = new Bundle();
+		// oBundle.putString(TrafficMap.INCIDENT_TYPE,incidentType);
+		// oBundle.putString(TrafficMap.INCIDENT_DESCRIPTION,incidentDes);
+		// oBundle.putInt(TrafficMap.LAT, incidentPoint.getLatitudeE6());
+		// oBundle.putInt(TrafficMap.LONG, incidentPoint.getLongitudeE6());
+		// detailActIntent.putExtras(oBundle);
+		// mContext.startActivity(detailActIntent);
+		// }
+
+		String incidentType = incidents.get(index).getTitle();
+		if (!incidentType.equals("Me")) {
+			String incidentDes = incidents.get(index).getSnippet();
+			GeoPoint incidentPoint = incidents.get(index).getPoint();
+
+			TrafficMap.showDetail(incidentPoint, incidentType, incidentDes);
+		}
 		return true;
 	}
 
-	
 	public static Location convertGpToLoc(GeoPoint gp) {
 		Location convertedLocation = new Location("");
 		convertedLocation.setLatitude(gp.getLatitudeE6() / 1e6);

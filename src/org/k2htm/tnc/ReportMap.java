@@ -24,6 +24,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -38,7 +39,7 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.OverlayItem;
 
-public class ReportMapActivity extends MapActivity {
+public class ReportMap extends MapActivity {
 	private MapController mapController;
 	private MapView map = null;
 	private GeoPoint currentPoint;
@@ -46,6 +47,7 @@ public class ReportMapActivity extends MapActivity {
 	private Button btnConfirm;
 	private ImageView imvImage;
 	private TextView tvLat, tvLong;
+	private EditText edtDes;
 	private Spinner spnType;
 	private Uri imageUri;
 	public static final String TAG = "ReportMapActivity";
@@ -61,6 +63,7 @@ public class ReportMapActivity extends MapActivity {
 		tvLong = ((TextView) findViewById(R.id.longitudeText));
 		spnType = (Spinner) findViewById(R.id.spn_type);
 		imvImage = (ImageView) findViewById(R.id.imbImage);
+		edtDes = (EditText) findViewById(R.id.edtDescription);
 		// set location get from bundle from trafficMap
 		setCurLocation();
 		// set text
@@ -71,15 +74,6 @@ public class ReportMapActivity extends MapActivity {
 
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
-
-				switch (spnType.getSelectedItemPosition()) {
-				case 0:
-
-					break;
-				case 1:
-				default:
-					break;
-				}
 				Log.i(TAG,
 						"spinner select : " + spnType.getSelectedItemPosition()
 								+ "Click confirm "
@@ -87,7 +81,8 @@ public class ReportMapActivity extends MapActivity {
 								+ tvLong.getText().toString());
 				writeToFile(Integer.parseInt(tvLat.getText().toString()),
 						Integer.parseInt((tvLong.getText().toString())),
-						spnType.getSelectedItemPosition());
+						spnType.getSelectedItemPosition(), edtDes.getText()
+								.toString(),imageUri.toString());
 			}
 		});
 
@@ -141,13 +136,20 @@ public class ReportMapActivity extends MapActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 		switch (requestCode) {
 		case CODE_IMAGE_PICKER:
-			if (resultCode == RESULT_OK) {
-				Uri selectedImage = imageUri;
-				Log.i(TAG, "Image Uri :  " + selectedImage);
-				if (selectedImage != null) {
-					// DO STH WITH THE URI
-					imvImage.setImageURI(selectedImage);
-					break;
+			if (resultCode == RESULT_OK) {				
+				if (data!= null) {
+					Uri selectedImage = data.getData();
+					Log.i(TAG, "Image Uri :  " + selectedImage);
+					if (selectedImage != null) {
+						// DO STH WITH THE URI
+						imvImage.setImageURI(selectedImage);
+						imageUri = selectedImage;
+						break;
+					}
+				} else {
+					if (imageUri != null) {
+						imvImage.setImageURI(imageUri);
+					}
 				}
 			}
 		}
@@ -313,17 +315,18 @@ public class ReportMapActivity extends MapActivity {
 	private void setCurLocation() {
 		Intent iIntent = getIntent();
 		Bundle iBundle = iIntent.getExtras();
-		currentPoint = new GeoPoint(iBundle.getInt(TrafficMapActivity.LAT),
-				iBundle.getInt(TrafficMapActivity.LONG));
-		Log.i("report", "lat: " + iBundle.getInt(TrafficMapActivity.LAT)
-				+ "\nlong:" + iBundle.getInt(TrafficMapActivity.LONG));
+		currentPoint = new GeoPoint(iBundle.getInt(TrafficMap.LAT),
+				iBundle.getInt(TrafficMap.LONG));
+		Log.i("report", "lat: " + iBundle.getInt(TrafficMap.LAT) + "\nlong:"
+				+ iBundle.getInt(TrafficMap.LONG));
 	}
 
-	private void writeToFile(int latitude, int longitude, int type) {
+	private void writeToFile(int latitude, int longitude, int type,
+			String description, String imageUri) {
 		Log.i(TAG, "asdf");
 		try { // catches IOException below
 			String outputString = new String(latitude + "\n" + longitude + "\n"
-					+ type);
+					+ type + "\n" + description + "\n" + imageUri);
 
 			// ##### Write a file to the disk #####
 			/*
@@ -349,7 +352,7 @@ public class ReportMapActivity extends MapActivity {
 			wr.flush();
 			wr.close();
 			Log.i("reaport", "write :" + outputString);
-			Toast.makeText(ReportMapActivity.this,
+			Toast.makeText(ReportMap.this,
 					"Reported point :" + latitude + " " + longitude,
 					Toast.LENGTH_SHORT).show();
 			// ##### Read the file back in #####

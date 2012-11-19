@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class Main extends Activity {
+public class WelcomeScreen extends Activity {
 	private Button btnStart;
 
 	@Override
@@ -47,7 +47,7 @@ public class Main extends Activity {
 		protected void onPostExecute(Void result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
-			Intent intent = new Intent(Main.this, TrafficMapActivity.class);
+			Intent intent = new Intent(WelcomeScreen.this, TrafficMap.class);
 			startActivity(intent);
 		}
 

@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,22 +32,30 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
-public class TrafficMapActivity extends MapActivity implements LocationListener {
-	private MapController mapController;
+public class TrafficMap extends MapActivity implements LocationListener {
+	private static MapController mapController;
 	private MapView mapView;
 	private LocationManager locationManager;
-	private GeoPoint currentPoint;
+	private static GeoPoint currentPoint;
 	private Location currentLocation = null;
-	private TrafficOverlay currPos;
+	private TrafficOverlay currPosOverlay;
 	private Button btnReport;
 	private TextView tvProvider;
+	private static TextView tvType;
+	private static TextView tvDes;
+	private static LinearLayout llDetail;
 	public static final int REQUEST_CODE = 100;
 	public static final String TAG = "Traffic Map";
 	public static final String LONG = "longitude";
 	public static final String LAT = "latitude";
+	public static final String INCIDENT_TYPE = "title";
+	public static final String INCIDENT_DESCRIPTION = "des";
 	public static final int TRAFFIC_JAM_CODE = 0;
+	public static final String TRAFFIC_JAM_STRING = "Traffic Jam";
 	public static final int ACCIDENT_CODE = 1;
+	public static final String ACCIDENT_STRING = "Accident";
 	public static final int BLOCKED_CODE = 2;
+	public static final String BLOCKED_STRING = "Blocked";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -55,8 +64,10 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 		// find view
 		btnReport = (Button) findViewById(R.id.btnReport);
 		tvProvider = ((TextView) findViewById(R.id.providerText));
-		// mapview setting
 		mapView = (MapView) findViewById(R.id.mapView);
+		llDetail = (LinearLayout) findViewById(R.id.llDetail);
+		tvDes = (TextView) findViewById(R.id.tvDescription);
+		tvType = (TextView) findViewById(R.id.tvIncType);
 		// turn on zoom controller if device not support multitouch
 		if (getPackageManager().hasSystemFeature(
 				PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)) {
@@ -66,6 +77,7 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 			// do magnifying glass
 			mapView.setBuiltInZoomControls(true);
 		}
+		// mapview setting
 		mapView.setSatellite(false);
 		mapController = mapView.getController();
 		mapController.setZoom(15);
@@ -81,8 +93,7 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 				Bundle oBundle = new Bundle();
 				oBundle.putInt(LAT, currentPoint.getLatitudeE6());
 				oBundle.putInt(LONG, currentPoint.getLongitudeE6());
-				Intent oIntent = new Intent(TrafficMapActivity.this,
-						ReportMapActivity.class);
+				Intent oIntent = new Intent(TrafficMap.this, ReportMap.class);
 				oIntent.putExtras(oBundle);
 				startActivityForResult(oIntent, REQUEST_CODE);
 			}
@@ -92,6 +103,20 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 
 	public void centerToCurrentLocation(View view) {
 		animateToCurrentLocation();
+	}
+
+	public static void showDetail(GeoPoint point, String type,
+			String description) {
+		llDetail.setVisibility(View.VISIBLE);
+		tvType.setText(type);
+		tvDes.setText(description);
+		if (point != null) {
+			mapController.animateTo(point);
+		}
+	}
+
+	public void hideDetail(View view) {
+		llDetail.setVisibility(View.GONE);
 	}
 
 	public void getLastLocation() {
@@ -156,15 +181,15 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 
 	public void drawCurrPositionOverlay() {
 		List<Overlay> overlays = mapView.getOverlays();
-		overlays.remove(currPos);
+		overlays.remove(currPosOverlay);
 		Drawable marker = getResources().getDrawable(R.drawable.icon_you);
-		currPos = new TrafficOverlay(marker, mapView);
+		currPosOverlay = new TrafficOverlay(marker, mapView);
 		if (currentPoint != null) {
 			OverlayItem overlayitem = new OverlayItem(currentPoint, "Me",
 					"Here I am!");
-			currPos.addOverlay(overlayitem);
-			overlays.add(currPos);
-			currPos.setCurrentLocation(currentLocation);
+			currPosOverlay.addOverlay(overlayitem);
+			overlays.add(currPosOverlay);
+			currPosOverlay.setCurrentLocation(currentLocation);
 		}
 	}
 
@@ -196,6 +221,9 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 			int tmp_lat;
 			int tmp_long;
 			int tmp_type;
+			String des_string;
+			String type_string = TRAFFIC_JAM_STRING;
+			String imageUri;
 			while ((strLine = reader.readLine()) != null) {
 				tmp_lat = Integer.parseInt(strLine);
 				Log.i(TAG, "tmp_lat:" + strLine);
@@ -204,18 +232,36 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 				Log.i(TAG, "tmp_long:" + strLine);
 				strLine = reader.readLine();
 				tmp_type = Integer.parseInt(strLine);
-				Log.i(TAG, "tmp_type:" + strLine);
-				OverlayItem overlayItem = new OverlayItem(new GeoPoint(tmp_lat,
-						tmp_long), "Saved Point", "you selected this before");
+				Log.i(TAG, "tmp_type:" + tmp_type);
+				des_string = reader.readLine();
+				Log.i(TAG, "tmp_des:" + des_string);
+				imageUri = reader.readLine();
+				Log.i(TAG, "image uri:" + imageUri);
+				// get type string
+				switch (tmp_type) {
+				case TrafficMap.TRAFFIC_JAM_CODE:
+					type_string = TRAFFIC_JAM_STRING;
+					break;
+				case TrafficMap.ACCIDENT_CODE:
+					type_string = ACCIDENT_STRING;
+					break;
+				case TrafficMap.BLOCKED_CODE:
+					type_string = BLOCKED_STRING;
+					break;
+				default:
+					break;
+				}
+				IncidentOverlayItem overlayItem = new IncidentOverlayItem(new GeoPoint(
+						tmp_lat, tmp_long), type_string, des_string, imageUri);
 				// draw correct icon at that position
 				switch (tmp_type) {
-				case TrafficMapActivity.TRAFFIC_JAM_CODE:
+				case TrafficMap.TRAFFIC_JAM_CODE:
 					jamPos.addOverlay(overlayItem);
 					break;
-				case TrafficMapActivity.ACCIDENT_CODE:
+				case TrafficMap.ACCIDENT_CODE:
 					accidentPos.addOverlay(overlayItem);
 					break;
-				case TrafficMapActivity.BLOCKED_CODE:
+				case TrafficMap.BLOCKED_CODE:
 					blockedPos.addOverlay(overlayItem);
 					break;
 				default:
@@ -288,6 +334,10 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 		// TODO Auto-generated method stub
 		super.onPause();
 		locationManager.removeUpdates(this);
+	}
+
+	public static GeoPoint getCurrentPoint() {
+		return currentPoint;
 	}
 
 }
