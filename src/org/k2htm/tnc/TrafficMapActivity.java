@@ -9,6 +9,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
@@ -56,7 +57,15 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 		tvProvider = ((TextView) findViewById(R.id.providerText));
 		// mapview setting
 		mapView = (MapView) findViewById(R.id.mapView);
-		mapView.setBuiltInZoomControls(true);
+		// turn on zoom controller if device not support multitouch
+		if (getPackageManager().hasSystemFeature(
+				PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)) {
+			// do multitouch
+			mapView.setBuiltInZoomControls(false);
+		} else {
+			// do magnifying glass
+			mapView.setBuiltInZoomControls(true);
+		}
 		mapView.setSatellite(false);
 		mapController = mapView.getController();
 		mapController.setZoom(15);
@@ -79,6 +88,10 @@ public class TrafficMapActivity extends MapActivity implements LocationListener 
 			}
 		});
 
+	}
+
+	public void centerToCurrentLocation(View view) {
+		animateToCurrentLocation();
 	}
 
 	public void getLastLocation() {

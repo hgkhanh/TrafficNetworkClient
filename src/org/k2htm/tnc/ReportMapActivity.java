@@ -3,7 +3,6 @@ package org.k2htm.tnc;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,10 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -30,32 +33,39 @@ import android.widget.Toast;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapActivity;
+import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.OverlayItem;
 
 public class ReportMapActivity extends MapActivity {
+	private MapController mapController;
 	private MapView map = null;
 	private GeoPoint currentPoint;
 	private MyLocationOverlay me = null;
 	private Button btnConfirm;
+	private ImageView imvImage;
 	private TextView tvLat, tvLong;
 	private Spinner spnType;
+	private Uri imageUri;
 	public static final String TAG = "ReportMapActivity";
+	public static final int CODE_IMAGE_PICKER = 201;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_report_map);
-		// set location get from bundle from trafficMap
-		setCurLocation();
 		// get view
 		btnConfirm = (Button) findViewById(R.id.btnConfirm);
 		tvLat = ((TextView) findViewById(R.id.latitudeText));
-		tvLat.setText(String.valueOf((int) (currentPoint.getLatitudeE6())));
 		tvLong = ((TextView) findViewById(R.id.longitudeText));
-		tvLong.setText(String.valueOf((int) (currentPoint.getLongitudeE6())));
 		spnType = (Spinner) findViewById(R.id.spn_type);
+		imvImage = (ImageView) findViewById(R.id.imbImage);
+		// set location get from bundle from trafficMap
+		setCurLocation();
+		// set text
+		tvLat.setText(String.valueOf((int) (currentPoint.getLatitudeE6())));
+		tvLong.setText(String.valueOf((int) (currentPoint.getLongitudeE6())));
 		// set button listener
 		btnConfirm.setOnClickListener(new OnClickListener() {
 
@@ -81,11 +91,21 @@ public class ReportMapActivity extends MapActivity {
 			}
 		});
 
+		// mapview setting
 		map = (MapView) findViewById(R.id.map);
 
 		map.getController().setCenter(currentPoint);
 		map.getController().setZoom(15);
-		map.setBuiltInZoomControls(true);
+
+		// turn on zoom controller if device not support multitouch
+		if (getPackageManager().hasSystemFeature(
+				PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)) {
+			// do multitouch
+			map.setBuiltInZoomControls(false);
+		} else {
+			// do magnifying glass
+			map.setBuiltInZoomControls(true);
+		}
 
 		Drawable marker = getResources().getDrawable(R.drawable.marker);
 
@@ -96,6 +116,52 @@ public class ReportMapActivity extends MapActivity {
 
 		me = new MyLocationOverlay(this, map);
 		map.getOverlays().add(me);
+	}
+
+	public void callImagePicker(View view) {
+		Intent pickIntent = new Intent(Intent.ACTION_PICK,
+				android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+		Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+		File photo = new File(Environment.getExternalStorageDirectory(),
+				"Pic.jpg");
+		takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photo));
+		imageUri = Uri.fromFile(photo);
+		String pickTitle = "Select or take a new Picture";
+		Intent chooserIntent = Intent.createChooser(pickIntent, pickTitle);
+		chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
+				new Intent[] { takePhotoIntent });
+
+		startActivityForResult(chooserIntent, CODE_IMAGE_PICKER);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// TODO Auto-generated method stub
+		super.onActivityResult(requestCode, resultCode, data);
+		switch (requestCode) {
+		case CODE_IMAGE_PICKER:
+			if (resultCode == RESULT_OK) {
+				Uri selectedImage = imageUri;
+				Log.i(TAG, "Image Uri :  " + selectedImage);
+				if (selectedImage != null) {
+					// DO STH WITH THE URI
+					imvImage.setImageURI(selectedImage);
+					break;
+				}
+			}
+		}
+	}
+
+	public void centerToCurrentLocation(View view) {
+		animateToCurrentLocation();
+	}
+
+	public void animateToCurrentLocation() {
+		if (currentPoint != null) {
+			map.getController().animateTo(currentPoint);
+		}
+
 	}
 
 	@Override
@@ -266,7 +332,8 @@ public class ReportMapActivity extends MapActivity {
 			 * security-reasons. We chose MODE_WORLD_READABLE, because we have
 			 * nothing to hide in our file
 			 */
-			String filePath = this.getFilesDir().getPath().toString() + "/incidents.txt";
+			String filePath = this.getFilesDir().getPath().toString()
+					+ "/incidents.txt";
 			File file = new File(filePath);
 			if (!file.exists()) {
 				file.createNewFile();
@@ -281,7 +348,7 @@ public class ReportMapActivity extends MapActivity {
 			 */
 			wr.flush();
 			wr.close();
-			Log.i("reaport","write :" + outputString);
+			Log.i("reaport", "write :" + outputString);
 			Toast.makeText(ReportMapActivity.this,
 					"Reported point :" + latitude + " " + longitude,
 					Toast.LENGTH_SHORT).show();

@@ -97,27 +97,52 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:background="@drawable/box_shadows"
         android:orientation="vertical"
-        android:padding="15dp"
-        android:background="@drawable/box_shadows" >
+        android:paddingBottom="30dp"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:paddingTop="15dp" >
 
         <EditText
             android:id="@+id/edt_comment"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp" >
+            android:layout_height="match_parent"
+            android:layout_weight="3" >
         </EditText>
 
-        <Spinner
-            android:id="@+id/spn_type"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:entries="@array/incident_type_arrays"
-            android:prompt="@string/incident_type_prompt" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="right">
+
+            <Spinner
+                android:id="@+id/spn_type"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:entries="@array/incident_type_arrays"
+                android:prompt="@string/incident_type_prompt" />
+
+            <ImageView
+                android:layout_gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_weight="3"
+                android:id="@+id/imbImage"
+                android:adjustViewBounds="true"
+                android:scaleType="centerInside"
+                android:src="@drawable/btn_camera"
+                android:onClick="callImagePicker"
+                android:background="@android:color/transparent" />
+        </LinearLayout>
     </LinearLayout>
 
 </RelativeLayout>

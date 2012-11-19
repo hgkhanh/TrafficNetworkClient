@@ -1,9 +1,9 @@
 package org.k2htm.tnc;
 
-import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
-import android.view.Menu;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
@@ -14,23 +14,7 @@ public class Main extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_layout);
-		btnStart = (Button) findViewById(R.id.btnStart);
-
-		btnStart.setOnClickListener(new View.OnClickListener() {
-
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				Intent oIntent = new Intent(v.getContext(),
-						TrafficMapActivity.class);
-				startActivity(oIntent);
-			}
-		});
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
+		
 	}
 
 	@Override
@@ -38,5 +22,34 @@ public class Main extends Activity {
 		// TODO Auto-generated method stub
 		super.onPause();
 		finish();
+	}
+
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		new Next().execute();
+	}
+
+	class Next extends AsyncTask<Void, Void, Void> {
+		@Override
+		protected Void doInBackground(Void... params) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			Intent intent = new Intent(Main.this, TrafficMapActivity.class);
+			startActivity(intent);
+		}
+
 	}
 }
