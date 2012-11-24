@@ -19,4 +19,11 @@
         <item>Blocked</item>
     </string-array>
 
+    <string name="username_edt_hint">your username</string>
+    <string name="password_edt_hint">your password</string>
+    <string name="login_act_header">Login</string>
+    <string name="btn_confirm">Confirm</string>
+    <string name="toast_usr_pass_null">Username and Password must not be null</string>
+    <string name="toast_usr_pass_check_failed">Username or Password is incorrect</string>
+
 </resources>
