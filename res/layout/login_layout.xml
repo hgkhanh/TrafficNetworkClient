@@ -12,7 +12,6 @@
         android:orientation="vertical" >
 
         <TextView
-            android:id="@+id/edtUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -30,6 +29,7 @@
         android:padding="10sp" >
 
         <EditText
+            android:id="@+id/edtUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10sp"
@@ -49,14 +49,32 @@
             android:padding="5sp"
             android:textSize="18sp" />
 
-        <Button
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:text="@string/btn_confirm" />
+            android:gravity="right"
+            android:orientation="horizontal" >
 
-        <EditText>
-        </EditText>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <Button
+                    android:id="@+id/btnReg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10sp"
+                    android:background="@android:color/transparent"
+                    android:text="@string/reg_text_btn" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnConfirm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="15sp"
+                android:text="@string/btn_confirm" />
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

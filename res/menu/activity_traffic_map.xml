@@ -1,5 +1,33 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/menu_settings"
-        android:title="@string/menu_settings"
-        android:orderInCategory="100" />
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_settings"
+        android:orderInCategory="100"
+        android:title="@string/menu_settings">
+    </item>
+    <item
+        android:id="@+id/menu_filter"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:orderInCategory="1"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_filter">
+        <menu>
+            <item
+                android:id="@+id/min10"
+                android:title="10 min"/>
+            <item
+                android:id="@+id/min30"
+                android:title="30 min"/>
+            <item
+                android:id="@+id/hour1"
+                android:title="1 h"/>
+            <item
+                android:id="@+id/hour3"
+                android:title="3 h"/>
+            <item
+                android:id="@+id/hour6"
+                android:title="6 h"/>
+        </menu>
+    </item>
+
 </menu>

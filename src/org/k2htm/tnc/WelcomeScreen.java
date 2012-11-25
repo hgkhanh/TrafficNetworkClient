@@ -39,7 +39,7 @@ public class WelcomeScreen extends Activity {
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}  
 			return null;
 		}
 
@@ -47,7 +47,7 @@ public class WelcomeScreen extends Activity {
 		protected void onPostExecute(Void result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
-			Intent intent = new Intent(WelcomeScreen.this, TrafficMap.class);
+			Intent intent = new Intent(WelcomeScreen.this, LogInActivity.class);
 			startActivity(intent);
 		}
 

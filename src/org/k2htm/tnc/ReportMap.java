@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +52,7 @@ public class ReportMap extends MapActivity {
 	private EditText edtDes;
 	private Spinner spnType;
 	private Uri imageUri;
+	private String imageUriStr;
 	public static final String TAG = "ReportMapActivity";
 	public static final int CODE_IMAGE_PICKER = 201;
 
@@ -64,6 +67,7 @@ public class ReportMap extends MapActivity {
 		spnType = (Spinner) findViewById(R.id.spn_type);
 		imvImage = (ImageView) findViewById(R.id.imbImage);
 		edtDes = (EditText) findViewById(R.id.edtDescription);
+
 		// set location get from bundle from trafficMap
 		setCurLocation();
 		// set text
@@ -74,15 +78,29 @@ public class ReportMap extends MapActivity {
 
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
+				// check null type edt
+
+				if (edtDes.getText().toString().equals("")) {
+					edtDes.setText(" ");
+				}
+				Log.i(TAG, "asdf");
+				try {
+					imageUriStr = imageUri.toString();
+				} catch (Exception e) {
+
+				}
+				Log.i(TAG, "asdf");
 				Log.i(TAG,
 						"spinner select : " + spnType.getSelectedItemPosition()
-								+ "Click confirm "
-								+ (tvLat.getText().toString()) + " "
-								+ tvLong.getText().toString());
+								+ "\nClick confirm "
+								+ tvLat.getText().toString() + " "
+								+ tvLong.getText().toString() + "\nImage uri "
+								+ imageUriStr);
+				Log.i(TAG, "asdf");
 				writeToFile(Integer.parseInt(tvLat.getText().toString()),
 						Integer.parseInt((tvLong.getText().toString())),
 						spnType.getSelectedItemPosition(), edtDes.getText()
-								.toString(),imageUri.toString());
+								.toString(), imageUriStr);
 			}
 		});
 
@@ -102,7 +120,8 @@ public class ReportMap extends MapActivity {
 			map.setBuiltInZoomControls(true);
 		}
 
-		Drawable marker = getResources().getDrawable(R.drawable.marker);
+		Drawable marker = getResources()
+				.getDrawable(R.drawable.indicator_blank);
 
 		marker.setBounds(0, 0, marker.getIntrinsicWidth(),
 				marker.getIntrinsicHeight());
@@ -136,8 +155,8 @@ public class ReportMap extends MapActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 		switch (requestCode) {
 		case CODE_IMAGE_PICKER:
-			if (resultCode == RESULT_OK) {				
-				if (data!= null) {
+			if (resultCode == RESULT_OK) {
+				if (data != null) {
 					Uri selectedImage = data.getData();
 					Log.i(TAG, "Image Uri :  " + selectedImage);
 					if (selectedImage != null) {
@@ -335,6 +354,7 @@ public class ReportMap extends MapActivity {
 			 * security-reasons. We chose MODE_WORLD_READABLE, because we have
 			 * nothing to hide in our file
 			 */
+			Log.i(TAG, "asdf");
 			String filePath = this.getFilesDir().getPath().toString()
 					+ "/incidents.txt";
 			File file = new File(filePath);
@@ -351,7 +371,7 @@ public class ReportMap extends MapActivity {
 			 */
 			wr.flush();
 			wr.close();
-			Log.i("reaport", "write :" + outputString);
+			Log.i("report", "write :" + outputString);
 			Toast.makeText(ReportMap.this,
 					"Reported point :" + latitude + " " + longitude,
 					Toast.LENGTH_SHORT).show();

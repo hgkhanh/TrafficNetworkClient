@@ -18,6 +18,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -42,6 +43,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	private Button btnReport;
 	private TextView tvProvider;
 	private static TextView tvType;
+	private TrafficNetworkClient mApplication;
 	private static TextView tvDes;
 	private static LinearLayout llDetail;
 	public static final int REQUEST_CODE = 100;
@@ -61,6 +63,12 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_traffic_map);
+		// app obj
+		mApplication = (TrafficNetworkClient) getApplication();
+		Toast.makeText(
+				TrafficMap.this,
+				getText(R.string.login_user_toast) + " : "
+						+ mApplication.getUser(), Toast.LENGTH_SHORT).show();
 		// find view
 		btnReport = (Button) findViewById(R.id.btnReport);
 		tvProvider = ((TextView) findViewById(R.id.providerText));
@@ -251,8 +259,9 @@ public class TrafficMap extends MapActivity implements LocationListener {
 				default:
 					break;
 				}
-				IncidentOverlayItem overlayItem = new IncidentOverlayItem(new GeoPoint(
-						tmp_lat, tmp_long), type_string, des_string, imageUri);
+				IncidentOverlayItem overlayItem = new IncidentOverlayItem(
+						new GeoPoint(tmp_lat, tmp_long), type_string,
+						des_string, imageUri);
 				// draw correct icon at that position
 				switch (tmp_type) {
 				case TrafficMap.TRAFFIC_JAM_CODE:
@@ -290,7 +299,53 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_traffic_map, menu);
+
 		return true;
+	}
+
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		// TODO Auto-generated method stub
+		switch (item.getItemId()) {
+		case R.id.min10:
+			mApplication.setTimeFilter(10);
+			Toast.makeText(
+					TrafficMap.this,
+					getString(R.string.menu_filter_success_toast) + ": "
+							+ item.getTitle(), Toast.LENGTH_SHORT).show();
+			return true;
+		case R.id.min30:
+			mApplication.setTimeFilter(30);
+			Toast.makeText(
+					TrafficMap.this,
+					getString(R.string.menu_filter_success_toast) + ": "
+							+ item.getTitle(), Toast.LENGTH_SHORT).show();
+			return true;
+		case R.id.hour1:
+			mApplication.setTimeFilter(60);
+			Toast.makeText(
+					TrafficMap.this,
+					getString(R.string.menu_filter_success_toast) + ": "
+							+ item.getTitle(), Toast.LENGTH_SHORT).show();
+			return true;
+		case R.id.hour3:
+			mApplication.setTimeFilter(180);
+			Toast.makeText(
+					TrafficMap.this,
+					getString(R.string.menu_filter_success_toast) + ": "
+							+ item.getTitle(), Toast.LENGTH_SHORT).show();
+			return true;
+		case R.id.hour6:
+			mApplication.setTimeFilter(360);
+			Toast.makeText(
+					TrafficMap.this,
+					getString(R.string.menu_filter_success_toast) + ": "
+							+ item.getTitle(), Toast.LENGTH_SHORT).show();
+			return true;
+		default:
+			Log.i(TAG, "Time Filter : " + mApplication.getTimeFilter());
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	@Override

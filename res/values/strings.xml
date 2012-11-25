@@ -1,6 +1,7 @@
 <resources>
 
-    <string name="app_name">Traffic Network</string>
+    <string name="app_name_prefix">Traffic Social Network</string>
+    <string name="app_name">MyWay</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_main">Main</string>
@@ -21,9 +22,16 @@
 
     <string name="username_edt_hint">your username</string>
     <string name="password_edt_hint">your password</string>
+    <string name="re_password_edt_hint">your password again</string>
     <string name="login_act_header">Login</string>
     <string name="btn_confirm">Confirm</string>
     <string name="toast_usr_pass_null">Username and Password must not be null</string>
     <string name="toast_usr_pass_check_failed">Username or Password is incorrect</string>
-
+    <string name="toast_pass_repass_error">check your password again </string>
+    <string name="register_act_header">Register</string>
+    <string name="menu_filter">Time Filter</string>
+    <string name="menu_filter_toast">Choose Time Filter for Incidents showing on Map</string>
+    <string name="menu_filter_success_toast">Set Time Filter to </string>
+    <string name="reg_text_btn"><u>Create Account</u></string>
+ <string name="login_user_toast"><u>Logged in as</u></string>
 </resources>
