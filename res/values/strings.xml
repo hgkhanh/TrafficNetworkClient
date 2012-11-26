@@ -20,9 +20,9 @@
         <item>Blocked</item>
     </string-array>
 
-    <string name="username_edt_hint">your username</string>
-    <string name="password_edt_hint">your password</string>
-    <string name="re_password_edt_hint">your password again</string>
+    <string name="username_edt_hint">Your username</string>
+    <string name="password_edt_hint">Your password</string>
+    <string name="re_password_edt_hint">Your password again</string>
     <string name="login_act_header">Login</string>
     <string name="btn_confirm">Confirm</string>
     <string name="toast_usr_pass_null">Username and Password must not be null</string>
@@ -34,4 +34,6 @@
     <string name="menu_filter_success_toast">Set Time Filter to </string>
     <string name="reg_text_btn"><u>Create Account</u></string>
  <string name="login_user_toast"><u>Logged in as</u></string>
+ <string name="network_error">Network Error</string>
+ <string name="duplicate_error">Username taken. Please choose another</string>
 </resources>

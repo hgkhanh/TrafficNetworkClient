@@ -8,7 +8,7 @@ public class TrafficNetworkClient extends Application {
 	private String user;
 	public static final int DEFAULT_TIME_FILTER = 60;
 	public static final String DEFAULT_USER = "Guest";
-
+public static final String ADDRESS="192.168.0.100:8080";
 	@Override
 	public void onCreate() {
 		// TODO Auto-generated method stub

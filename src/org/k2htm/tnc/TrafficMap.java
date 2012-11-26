@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
@@ -15,6 +16,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -32,6 +34,10 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
+
+import edu.k2htm.clientHelper.HoaHelper;
+import edu.k2htm.datahelper.Report;
+import edu.k2htm.datahelper.ReportGetter;
 
 public class TrafficMap extends MapActivity implements LocationListener {
 	private static MapController mapController;
@@ -201,7 +207,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		}
 	}
 
-	public void drawIncidentOverlay() {
+	public void drawIncidentOverlay(ArrayList<Report> result) {
 		List<Overlay> overlays = mapView.getOverlays();
 		// create
 		Drawable marker = getResources().getDrawable(R.drawable.indicator_jam);
@@ -212,79 +218,63 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		TrafficOverlay blockedPos = new TrafficOverlay(marker, mapView);
 
 		/*
-		 * read from file
+		 * read from ArrayList
 		 */
-		// FileInputStream fis;
-		Log.i(TAG, "read file");
-		try {
-			// fis = openFileInput("incidents.txt");
-			String filePath = this.getFilesDir().getPath().toString()
-					+ "/incidents.txt";
-			File file = new File(filePath);
-			InputStream is = new FileInputStream(file);
-			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(is));
+		Log.i(TAG, "read List");
 
-			String strLine = null;
-			int tmp_lat;
-			int tmp_long;
-			int tmp_type;
-			String des_string;
-			String type_string = TRAFFIC_JAM_STRING;
-			String imageUri;
-			while ((strLine = reader.readLine()) != null) {
-				tmp_lat = Integer.parseInt(strLine);
-				Log.i(TAG, "tmp_lat:" + strLine);
-				strLine = reader.readLine();
-				tmp_long = Integer.parseInt(strLine);
-				Log.i(TAG, "tmp_long:" + strLine);
-				strLine = reader.readLine();
-				tmp_type = Integer.parseInt(strLine);
-				Log.i(TAG, "tmp_type:" + tmp_type);
-				des_string = reader.readLine();
-				Log.i(TAG, "tmp_des:" + des_string);
-				imageUri = reader.readLine();
-				Log.i(TAG, "image uri:" + imageUri);
-				// get type string
-				switch (tmp_type) {
-				case TrafficMap.TRAFFIC_JAM_CODE:
-					type_string = TRAFFIC_JAM_STRING;
-					break;
-				case TrafficMap.ACCIDENT_CODE:
-					type_string = ACCIDENT_STRING;
-					break;
-				case TrafficMap.BLOCKED_CODE:
-					type_string = BLOCKED_STRING;
-					break;
-				default:
-					break;
-				}
-				IncidentOverlayItem overlayItem = new IncidentOverlayItem(
-						new GeoPoint(tmp_lat, tmp_long), type_string,
-						des_string, imageUri);
-				// draw correct icon at that position
-				switch (tmp_type) {
-				case TrafficMap.TRAFFIC_JAM_CODE:
-					jamPos.addOverlay(overlayItem);
-					break;
-				case TrafficMap.ACCIDENT_CODE:
-					accidentPos.addOverlay(overlayItem);
-					break;
-				case TrafficMap.BLOCKED_CODE:
-					blockedPos.addOverlay(overlayItem);
-					break;
-				default:
-					jamPos.addOverlay(overlayItem);
-					break;
-				}
-
+		int tmp_lat;
+		int tmp_long;
+		int tmp_type;
+		String des_string;
+		String type_string = TRAFFIC_JAM_STRING;
+		String imageUri;
+		for (int i = 0; i < result.size(); i++) {
+			Report curReport = result.get(i);
+			tmp_lat = curReport.getLat();
+			Log.i(TAG, "tmp_lat:" + tmp_lat);
+			tmp_long = curReport.getLng();
+			Log.i(TAG, "tmp_long:" + tmp_long);
+			tmp_type = curReport.getType();
+			Log.i(TAG, "tmp_type:" + tmp_type);
+			des_string = curReport.getDescription();
+			Log.i(TAG, "tmp_des:" + des_string);
+			imageUri = curReport.getImage();
+			Log.i(TAG, "image uri:" + imageUri);
+			// get type string
+			switch (tmp_type) {
+			case TrafficMap.TRAFFIC_JAM_CODE:
+				type_string = TRAFFIC_JAM_STRING;
+				break;
+			case TrafficMap.ACCIDENT_CODE:
+				type_string = ACCIDENT_STRING;
+				break;
+			case TrafficMap.BLOCKED_CODE:
+				type_string = BLOCKED_STRING;
+				break;
+			default:
+				break;
 			}
+			IncidentOverlayItem overlayItem = new IncidentOverlayItem(
+					new GeoPoint(tmp_lat, tmp_long), type_string, des_string,
+					imageUri);
 
-			reader.close();
-			is.close();
-
-		} catch (Exception e) {
+			// draw correct icon at that position
+			switch (tmp_type) {
+			case TrafficMap.TRAFFIC_JAM_CODE:
+				jamPos.addOverlay(overlayItem);
+				break;
+			case TrafficMap.ACCIDENT_CODE:
+				accidentPos.addOverlay(overlayItem);
+				break;
+			case TrafficMap.BLOCKED_CODE:
+				blockedPos.addOverlay(overlayItem);
+				break;
+			default:
+				jamPos.addOverlay(overlayItem);
+				break;
+			}
 		}
+
 		overlays.add(jamPos);
 		overlays.add(accidentPos);
 		overlays.add(blockedPos);
@@ -381,7 +371,8 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		locationManager
 				.requestLocationUpdates(getBestProvider(), 1000, 1, this);
 
-		drawIncidentOverlay();
+		GetReportTask mGetReportTask = new GetReportTask();
+		mGetReportTask.execute();
 	}
 
 	@Override
@@ -393,6 +384,45 @@ public class TrafficMap extends MapActivity implements LocationListener {
 
 	public static GeoPoint getCurrentPoint() {
 		return currentPoint;
+	}
+
+	private class GetReportTask extends
+			AsyncTask<Void, String, ArrayList<Report>> {
+
+		@Override
+		protected ArrayList<Report> doInBackground(Void... params) {
+			// TODO Auto-generated method stub
+			ReportGetter mReportGetter = new ReportGetter(new HoaHelper(
+					TrafficNetworkClient.ADDRESS));
+			try {
+				Log.i(TAG, "getReport start");
+				mReportGetter.getReports(mApplication.getTimeFilter());
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				Log.i(TAG, e.getMessage());
+				publishProgress(getText(R.string.network_error) + "");
+			}
+			return null;
+		}
+
+		@Override
+		protected void onProgressUpdate(String... values) {
+			// TODO Auto-generated method stub
+			super.onProgressUpdate(values);
+			Toast.makeText(TrafficMap.this, values[0], Toast.LENGTH_SHORT)
+					.show();
+		}
+
+		@Override
+		protected void onPostExecute(ArrayList<Report> result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			if (result == null) {
+				return;
+			}
+			drawIncidentOverlay(result);
+		}
 	}
 
 }
