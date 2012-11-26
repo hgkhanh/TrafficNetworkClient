@@ -48,8 +48,9 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	private TrafficOverlay currPosOverlay;
 	private Button btnReport;
 	private TextView tvProvider;
+	private static TextView tvUsername;
 	private static TextView tvType;
-	private TrafficNetworkClient mApplication;
+	private static TrafficNetworkClient mApplication;
 	private static TextView tvDes;
 	private static LinearLayout llDetail;
 	public static final int REQUEST_CODE = 100;
@@ -82,6 +83,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		llDetail = (LinearLayout) findViewById(R.id.llDetail);
 		tvDes = (TextView) findViewById(R.id.tvDescription);
 		tvType = (TextView) findViewById(R.id.tvIncType);
+		tvUsername = (TextView) findViewById(R.id.tvUsername);
 		// turn on zoom controller if device not support multitouch
 		if (getPackageManager().hasSystemFeature(
 				PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)) {
@@ -119,13 +121,23 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		animateToCurrentLocation();
 	}
 
-	public static void showDetail(GeoPoint point, String type,
-			String description) {
+	public static void showDetail(int index) {
+		Log.i(TAG,"reportList.toString" + mApplication.getReportList().toString());
+		Log.i(TAG,"showDetail(index) :" +index+"\nreportList.length=" + mApplication.getReportList().size() );
+		Log.i(TAG,"reportList.get(index)");
+		//index =1;
+		Report curReport =null;
+		Log.d(TAG,"Get i"+mApplication.getReportList().get(index).toString());
+		curReport=mApplication.getReportList().get(index);
 		llDetail.setVisibility(View.VISIBLE);
-		tvType.setText(type);
-		tvDes.setText(description);
-		if (point != null) {
-			mapController.animateTo(point);
+		//tvType.setText(curReport.getType()+"");
+		String tmp=Short.toString(curReport.getType());
+		tvType.setText(tmp);
+		tvDes.setText(curReport.getDescription());
+		tvUsername.setText(curReport.getUsername());
+		GeoPoint curPoint = new GeoPoint(curReport.getLat(), curReport.getLng());
+		if (curPoint != null) {
+			mapController.animateTo(curPoint);
 		}
 	}
 
@@ -208,6 +220,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	}
 
 	public void drawIncidentOverlay(ArrayList<Report> result) {
+		mApplication.setReportList(result);
 		List<Overlay> overlays = mapView.getOverlays();
 		// create
 		Drawable marker = getResources().getDrawable(R.drawable.indicator_jam);
@@ -228,6 +241,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		String des_string;
 		String type_string = TRAFFIC_JAM_STRING;
 		String imageUri;
+		String username;
 		for (int i = 0; i < result.size(); i++) {
 			Report curReport = result.get(i);
 			tmp_lat = curReport.getLat();
@@ -240,6 +254,8 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			Log.i(TAG, "tmp_des:" + des_string);
 			imageUri = curReport.getImage();
 			Log.i(TAG, "image uri:" + imageUri);
+			username = curReport.getUsername();
+			Log.i(TAG, "username:" + username);
 			// get type string
 			switch (tmp_type) {
 			case TrafficMap.TRAFFIC_JAM_CODE:
@@ -256,7 +272,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			}
 			IncidentOverlayItem overlayItem = new IncidentOverlayItem(
 					new GeoPoint(tmp_lat, tmp_long), type_string, des_string,
-					imageUri);
+					imageUri, username);
 
 			// draw correct icon at that position
 			switch (tmp_type) {
@@ -396,7 +412,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 					TrafficNetworkClient.ADDRESS));
 			try {
 				Log.i(TAG, "getReport start");
-				mReportGetter.getReports(mApplication.getTimeFilter());
+				return mReportGetter.getReports(mApplication.getTimeFilter());
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -421,6 +437,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			if (result == null) {
 				return;
 			}
+
 			drawIncidentOverlay(result);
 		}
 	}

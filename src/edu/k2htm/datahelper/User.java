@@ -2,6 +2,7 @@ package edu.k2htm.datahelper;
 
 import android.util.Log;
 
+
 public class User {
 	public static final String DB_USER_TABLENAME = "user";
 	public static final String DB_USER_USERNAME_COL = "username";

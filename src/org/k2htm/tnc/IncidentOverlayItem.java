@@ -5,10 +5,13 @@ import com.google.android.maps.OverlayItem;
 
 public class IncidentOverlayItem extends OverlayItem {
 	private String imageUri;
+	private String username;
 
-	public IncidentOverlayItem(GeoPoint geoPoint, String type, String description , String uri) {
+	public IncidentOverlayItem(GeoPoint geoPoint, String type,
+			String description, String uri, String username) {
 		super(geoPoint, type, description);
 		setImageUri(uri);
+		setUsername(username);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -18,6 +21,14 @@ public class IncidentOverlayItem extends OverlayItem {
 
 	public void setImageUri(String imageUri) {
 		this.imageUri = imageUri;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 }

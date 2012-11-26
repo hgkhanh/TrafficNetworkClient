@@ -95,7 +95,7 @@ public class ReportGetter {
 					username = getTagValue(USERNAME_TAG, eElement);
 					time = getTagValue(TIME_TAG, eElement);
 					lat = getTagValue(LAT_TAG, eElement);
-					lng = getTagValue(LAT_TAG, eElement);
+					lng = getTagValue(LNG_TAG, eElement);
 					des = getTagValue(DESCRIPTION_TAG, eElement);
 					type = getTagValue(TYPE_TAG, eElement);
 					image = getTagValue(IMAGE_TAG, eElement);
@@ -120,13 +120,14 @@ public class ReportGetter {
 		this.reportGetHelper.init();
 		reports = getReportGetHelper().getReport(periodMin);
 		this.reportGetHelper.close();
+		Log.d(TAG,"Get Result:\n"+toString());
 		return reports;
 	}
 
 	public String getReportAsXML(int periodMin) throws Exception {
 		//COMENT OUT THIS FOR TEST //
-		// this.getReports(periodMin);
-
+		this.getReports(periodMin);
+		
 		String outputXmlString = "";
 		try {
 			// create doc object
@@ -222,6 +223,7 @@ public class ReportGetter {
 		} catch (TransformerException tfe) {
 			tfe.printStackTrace();
 		}
+		Log.d(TAG,"xml result:"+outputXmlString);
 		return outputXmlString;
 	}
 
@@ -243,5 +245,15 @@ public class ReportGetter {
 		} else {
 			return null;
 		}
+	}
+	@Override
+	public String toString() {
+		StringBuffer buffer=new StringBuffer();
+		buffer.append("Report:"+this.reports.size()+"\n");
+		for(int i=0;i<reports.size();i++){
+			buffer.append(reports.get(i).toString()+"\n");
+		}
+		
+		return buffer.toString();
 	}
 }

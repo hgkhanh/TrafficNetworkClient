@@ -23,6 +23,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import android.util.Log;
+
 public class CommentGetter {
 	private static final String TAG = "CommentGetter";
 	private CommentHelper commentHelper;
@@ -57,10 +59,18 @@ public class CommentGetter {
 		return comments;
 	}
 
+	public int getCautionID() {
+		return cautionID;
+	}
+
+	public void setCautionID(int cautionID) {
+		this.cautionID = cautionID;
+	}
+
 	public String getCommentsAsXML(int cautionID) throws Exception {
 		// COMENT OUT THIS FOR TEST //
-		// Log.d(TAG, "get Comments as xml");
-		// this.getComments(cautionID);
+		Log.d(TAG, "get Comments as xml");
+		this.getComments(cautionID);
 		String outputXmlString = "";
 		try {
 			// create doc object
@@ -88,28 +98,28 @@ public class CommentGetter {
 				Element comment = doc
 						.createElement(COMMENT_ELEMENT_TAG);
 				rootElement.appendChild(comment);
-
+	
 				// set attribute to report element
 				Attr attr = doc.createAttribute("id");
 				attr.setValue("1");
 				comment.setAttributeNode(attr);
-
+	
 				// shorten way
 				// staff.setAttribute("id", "1");
-
+	
 				// id elements
 				Element id = doc.createElement(Comment.DB_COMMENT_CAUTION_COL);
 				id.appendChild(doc.createTextNode(curComment.getCautionID()
 						+ ""));
 				comment.appendChild(id);
-
+	
 				// commenter elements
 				Element commenter = doc
 						.createElement(Comment.DB_COMMENT_COMMENTER_COL);
 				commenter.appendChild(doc.createTextNode(curComment
 						.getCommenter()));
 				comment.appendChild(commenter);
-
+	
 				// comment_content elements
 				Element comment_content = doc
 						.createElement(Comment.DB_COMMENT_COMMENT_COL);
@@ -120,7 +130,7 @@ public class CommentGetter {
 				Element time = doc.createElement(Comment.DB_COMMENT_TIME_COL);
 				time.appendChild(doc.createTextNode(curComment.getTime() + ""));
 				comment.appendChild(time);
-
+	
 				// // write the content into xml file
 				// TransformerFactory transformerFactory = TransformerFactory
 				// .newInstance();
@@ -129,16 +139,16 @@ public class CommentGetter {
 				// DOMSource source = new DOMSource(doc);
 				// StreamResult result = new StreamResult(new
 				// File("C:\\file.xml"));
-
+	
 				// Output to String
 				TransformerFactory transformerFactory = TransformerFactory
 						.newInstance();
 				Transformer transformer = transformerFactory.newTransformer();
 				DOMSource source = new DOMSource(doc);
-
+	
 				OutputStream output = new ByteArrayOutputStream();
 				StreamResult result = new StreamResult(output);
-
+	
 				transformer.transform(source, result);
 				outputXmlString = output.toString();
 			}
@@ -148,14 +158,6 @@ public class CommentGetter {
 			tfe.printStackTrace();
 		}
 		return outputXmlString;
-	}
-
-	public int getCautionID() {
-		return cautionID;
-	}
-
-	public void setCautionID(int cautionID) {
-		this.cautionID = cautionID;
 	}
 
 	public CommentHelper getCommentHelper() {

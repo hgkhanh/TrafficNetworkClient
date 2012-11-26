@@ -1,5 +1,7 @@
 package edu.k2htm.datahelper;
 
+import android.util.Log;
+
 public class Report {
 	public static final String TAG = "Report";
 	public static final String PERIOD = "Period";
@@ -75,6 +77,7 @@ public class Report {
 	}
 
 	public short getType() {
+		Log.i(TAG, "get Type"+type);
 		return type;
 	}
 

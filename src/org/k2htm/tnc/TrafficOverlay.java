@@ -84,13 +84,13 @@ public class TrafficOverlay extends BalloonItemizedOverlay<OverlayItem> {
 		// detailActIntent.putExtras(oBundle);
 		// mContext.startActivity(detailActIntent);
 		// }
-
+		Log.i(TAG, "onTap(index) :" + index);
 		String incidentType = incidents.get(index).getTitle();
 		if (!incidentType.equals("Me")) {
-			String incidentDes = incidents.get(index).getSnippet();
-			GeoPoint incidentPoint = incidents.get(index).getPoint();
-
-			TrafficMap.showDetail(incidentPoint, incidentType, incidentDes);
+			// String incidentDes = incidents.get(index).getSnippet();
+			// GeoPoint incidentPoint = incidents.get(index).getPoint();
+			Log.i(TAG,"Tap tap tap:"+index);
+			TrafficMap.showDetail(index);
 		}
 		return true;
 	}
