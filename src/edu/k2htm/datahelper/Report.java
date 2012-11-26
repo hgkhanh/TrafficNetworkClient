@@ -16,7 +16,6 @@ public class Report {
 	public Report() {
 		// TODO Auto-generated constructor stub
 	}
-	/* Test */
 	public Report(String username, long time, int lat, int lng,
 			String des, short type, String image) {
 		setUsername(username);

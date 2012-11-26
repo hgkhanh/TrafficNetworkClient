@@ -3,32 +3,29 @@ package org.k2htm.tnc;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.OverlayItem;
 
-public class IncidentOverlayItem extends OverlayItem {
-	private String imageUri;
-	private String username;
+import edu.k2htm.datahelper.Report;
 
-	public IncidentOverlayItem(GeoPoint geoPoint, String type,
-			String description, String uri, String username) {
-		super(geoPoint, type, description);
-		setImageUri(uri);
-		setUsername(username);
+public class IncidentOverlayItem extends OverlayItem {
+	private Report report;
+
+	public IncidentOverlayItem(GeoPoint arg0, String arg1, String arg2) {
+		super(arg0, arg1, arg2);
+		this.report=null;;
 		// TODO Auto-generated constructor stub
 	}
 
-	public String getImageUri() {
-		return imageUri;
+	public IncidentOverlayItem(Report report) {
+		super(new GeoPoint(report.getLat(), report.getLng()), report
+				.getUsername(), report.getDescription());
+		this.report = report;
+
 	}
 
-	public void setImageUri(String imageUri) {
-		this.imageUri = imageUri;
+	public Report getReport() {
+		return report;
 	}
 
-	public String getUsername() {
-		return username;
+	public void setReport(Report report) {
+		this.report = report;
 	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
 }

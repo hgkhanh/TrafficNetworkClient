@@ -16,10 +16,10 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 
-public class TrafficOverlay extends BalloonItemizedOverlay<OverlayItem> {
+public class TrafficOverlay extends BalloonItemizedOverlay<IncidentOverlayItem> {
 	private Context mContext;
 	public static final String TAG = "Traffic Overlay";
-	private ArrayList<OverlayItem> incidents = new ArrayList<OverlayItem>();
+	private ArrayList<IncidentOverlayItem> incidents = new ArrayList<IncidentOverlayItem>();
 	private Location currentLocation;
 
 	public TrafficOverlay(Drawable defaultMarker, MapView mapView) {
@@ -36,7 +36,7 @@ public class TrafficOverlay extends BalloonItemizedOverlay<OverlayItem> {
 	}
 
 	@Override
-	protected OverlayItem createItem(int i) {
+	protected IncidentOverlayItem createItem(int i) {
 		// TODO Auto-generated method stub
 		return incidents.get(i);
 	}
@@ -47,13 +47,13 @@ public class TrafficOverlay extends BalloonItemizedOverlay<OverlayItem> {
 		return incidents.size();
 	}
 
-	public void addOverlay(OverlayItem overlay) {
+	public void addOverlay(IncidentOverlayItem overlay) {
 		incidents.add(overlay);
 		populate();
 	}
 
 	@Override
-	protected boolean onBalloonTap(int index, OverlayItem item) {
+	protected boolean onBalloonTap(int index, IncidentOverlayItem item) {
 
 		// CACULATE DISTANCE
 		// String tmp = incidents.get(index).getTitle();
@@ -84,13 +84,13 @@ public class TrafficOverlay extends BalloonItemizedOverlay<OverlayItem> {
 		// detailActIntent.putExtras(oBundle);
 		// mContext.startActivity(detailActIntent);
 		// }
-		Log.i(TAG, "onTap(index) :" + index);
-		String incidentType = incidents.get(index).getTitle();
+		Log.i(TAG, "item tapped :" + item.toString());
+		String incidentType = item.getTitle();
 		if (!incidentType.equals("Me")) {
 			// String incidentDes = incidents.get(index).getSnippet();
 			// GeoPoint incidentPoint = incidents.get(index).getPoint();
-			Log.i(TAG,"Tap tap tap:"+index);
-			TrafficMap.showDetail(index);
+			//Log.i(TAG,"Tap tap tap:"+index);
+			TrafficMap.showDetail(item);
 		}
 		return true;
 	}
@@ -101,5 +101,7 @@ public class TrafficOverlay extends BalloonItemizedOverlay<OverlayItem> {
 		convertedLocation.setLongitude(gp.getLongitudeE6() / 1e6);
 		return convertedLocation;
 	}
+
+
 
 }

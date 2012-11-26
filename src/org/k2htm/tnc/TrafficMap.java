@@ -1,10 +1,5 @@
 package org.k2htm.tnc;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -33,7 +29,6 @@ import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
-import com.google.android.maps.OverlayItem;
 
 import edu.k2htm.clientHelper.HoaHelper;
 import edu.k2htm.datahelper.Report;
@@ -48,10 +43,12 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	private TrafficOverlay currPosOverlay;
 	private Button btnReport;
 	private TextView tvProvider;
+	private boolean refreshing = false;
 	private static TextView tvUsername;
 	private static TextView tvType;
 	private static TrafficNetworkClient mApplication;
 	private static TextView tvDes;
+	private MenuItem refreshMenuItem;
 	private static LinearLayout llDetail;
 	public static final int REQUEST_CODE = 100;
 	public static final String TAG = "Traffic Map";
@@ -69,6 +66,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.activity_traffic_map);
 		// app obj
 		mApplication = (TrafficNetworkClient) getApplication();
@@ -77,6 +75,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 				getText(R.string.login_user_toast) + " : "
 						+ mApplication.getUser(), Toast.LENGTH_SHORT).show();
 		// find view
+
 		btnReport = (Button) findViewById(R.id.btnReport);
 		tvProvider = ((TextView) findViewById(R.id.providerText));
 		mapView = (MapView) findViewById(R.id.mapView);
@@ -121,18 +120,27 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		animateToCurrentLocation();
 	}
 
-	public static void showDetail(int index) {
-		Log.i(TAG,"reportList.toString" + mApplication.getReportList().toString());
-		Log.i(TAG,"showDetail(index) :" +index+"\nreportList.length=" + mApplication.getReportList().size() );
-		Log.i(TAG,"reportList.get(index)");
-		//index =1;
-		Report curReport =null;
-		Log.d(TAG,"Get i"+mApplication.getReportList().get(index).toString());
-		curReport=mApplication.getReportList().get(index);
+	public static void showDetail(IncidentOverlayItem overlayItem) {
+		Log.i(TAG, "Show Detail");
+		Report curReport = overlayItem.getReport();
 		llDetail.setVisibility(View.VISIBLE);
-		//tvType.setText(curReport.getType()+"");
-		String tmp=Short.toString(curReport.getType());
-		tvType.setText(tmp);
+		// tvType.setText(curReport.getType()+"");
+		String typeStr = "";
+		switch (curReport.getType()) {
+		case TrafficMap.TRAFFIC_JAM_CODE:
+			typeStr = TRAFFIC_JAM_STRING;
+			break;
+		case TrafficMap.ACCIDENT_CODE:
+			typeStr = ACCIDENT_STRING;
+			break;
+		case TrafficMap.BLOCKED_CODE:
+			typeStr = BLOCKED_STRING;
+			break;
+		default:
+			break;
+		}
+
+		tvType.setText(typeStr);
 		tvDes.setText(curReport.getDescription());
 		tvUsername.setText(curReport.getUsername());
 		GeoPoint curPoint = new GeoPoint(curReport.getLat(), curReport.getLng());
@@ -211,9 +219,9 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		Drawable marker = getResources().getDrawable(R.drawable.icon_you);
 		currPosOverlay = new TrafficOverlay(marker, mapView);
 		if (currentPoint != null) {
-			OverlayItem overlayitem = new OverlayItem(currentPoint, "Me",
-					"Here I am!");
-			currPosOverlay.addOverlay(overlayitem);
+			IncidentOverlayItem youItem = new IncidentOverlayItem(currentPoint,
+					"", "");
+			currPosOverlay.addOverlay(youItem);
 			overlays.add(currPosOverlay);
 			currPosOverlay.setCurrentLocation(currentLocation);
 		}
@@ -234,48 +242,49 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		 * read from ArrayList
 		 */
 		Log.i(TAG, "read List");
-
-		int tmp_lat;
-		int tmp_long;
-		int tmp_type;
-		String des_string;
-		String type_string = TRAFFIC_JAM_STRING;
-		String imageUri;
-		String username;
+		//
+		// String tmp_lat;
+		// String tmp_long;
+		// String tmp_type;
+		// String des_string;
+		// String type_string = TRAFFIC_JAM_STRING;
+		// String imageUri;
+		// String username;
+		// String time;
 		for (int i = 0; i < result.size(); i++) {
 			Report curReport = result.get(i);
-			tmp_lat = curReport.getLat();
-			Log.i(TAG, "tmp_lat:" + tmp_lat);
-			tmp_long = curReport.getLng();
-			Log.i(TAG, "tmp_long:" + tmp_long);
-			tmp_type = curReport.getType();
-			Log.i(TAG, "tmp_type:" + tmp_type);
-			des_string = curReport.getDescription();
-			Log.i(TAG, "tmp_des:" + des_string);
-			imageUri = curReport.getImage();
-			Log.i(TAG, "image uri:" + imageUri);
-			username = curReport.getUsername();
-			Log.i(TAG, "username:" + username);
+			// tmp_lat = curReport.getLat();
+			// Log.i(TAG, "tmp_lat:" + tmp_lat);
+			// tmp_long = curReport.getLng();
+			// Log.i(TAG, "tmp_long:" + tmp_long);
+			// tmp_type = curReport.getType();
+			// Log.i(TAG, "tmp_type:" + tmp_type);
+			// des_string = curReport.getDescription();
+			// Log.i(TAG, "tmp_des:" + des_string);
+			// imageUri = curReport.getImage();
+			// Log.i(TAG, "image uri:" + imageUri);
+			// username = curReport.getUsername();
+			// Log.i(TAG, "username:" + username);
+			// time = curReport.getTime();
+			// Log.i(TAG, "time:" + time);
 			// get type string
-			switch (tmp_type) {
-			case TrafficMap.TRAFFIC_JAM_CODE:
-				type_string = TRAFFIC_JAM_STRING;
-				break;
-			case TrafficMap.ACCIDENT_CODE:
-				type_string = ACCIDENT_STRING;
-				break;
-			case TrafficMap.BLOCKED_CODE:
-				type_string = BLOCKED_STRING;
-				break;
-			default:
-				break;
-			}
-			IncidentOverlayItem overlayItem = new IncidentOverlayItem(
-					new GeoPoint(tmp_lat, tmp_long), type_string, des_string,
-					imageUri, username);
+			// switch (tmp_type) {
+			// case TrafficMap.TRAFFIC_JAM_CODE:
+			// type_string = TRAFFIC_JAM_STRING;
+			// break;
+			// case TrafficMap.ACCIDENT_CODE:
+			// type_string = ACCIDENT_STRING;
+			// break;
+			// case TrafficMap.BLOCKED_CODE:
+			// type_string = BLOCKED_STRING;
+			// break;
+			// default:
+			// break;
+			// }
+			IncidentOverlayItem overlayItem = new IncidentOverlayItem(curReport);
 
 			// draw correct icon at that position
-			switch (tmp_type) {
+			switch (curReport.getType()) {
 			case TrafficMap.TRAFFIC_JAM_CODE:
 				jamPos.addOverlay(overlayItem);
 				break;
@@ -294,7 +303,6 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		overlays.add(jamPos);
 		overlays.add(accidentPos);
 		overlays.add(blockedPos);
-		// set curent position for each overlay to caculate distance from user
 		// to point of incident
 		jamPos.setCurrentLocation(currentLocation);
 		accidentPos.setCurrentLocation(currentLocation);
@@ -313,45 +321,52 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		// TODO Auto-generated method stub
 		switch (item.getItemId()) {
+		case R.id.map_refresh:
+			setProgressBarIndeterminateVisibility(true);
+			GetReportTask mGetReportTask = new GetReportTask();
+			mGetReportTask.execute();
+			
+			break;
 		case R.id.min10:
 			mApplication.setTimeFilter(10);
 			Toast.makeText(
 					TrafficMap.this,
 					getString(R.string.menu_filter_success_toast) + ": "
 							+ item.getTitle(), Toast.LENGTH_SHORT).show();
-			return true;
+			break;
 		case R.id.min30:
 			mApplication.setTimeFilter(30);
 			Toast.makeText(
 					TrafficMap.this,
 					getString(R.string.menu_filter_success_toast) + ": "
 							+ item.getTitle(), Toast.LENGTH_SHORT).show();
-			return true;
+			break;
 		case R.id.hour1:
 			mApplication.setTimeFilter(60);
 			Toast.makeText(
 					TrafficMap.this,
 					getString(R.string.menu_filter_success_toast) + ": "
 							+ item.getTitle(), Toast.LENGTH_SHORT).show();
-			return true;
+			break;
 		case R.id.hour3:
 			mApplication.setTimeFilter(180);
 			Toast.makeText(
 					TrafficMap.this,
 					getString(R.string.menu_filter_success_toast) + ": "
 							+ item.getTitle(), Toast.LENGTH_SHORT).show();
-			return true;
+			break;
 		case R.id.hour6:
 			mApplication.setTimeFilter(360);
 			Toast.makeText(
 					TrafficMap.this,
 					getString(R.string.menu_filter_success_toast) + ": "
 							+ item.getTitle(), Toast.LENGTH_SHORT).show();
-			return true;
+			break;
 		default:
 			Log.i(TAG, "Time Filter : " + mApplication.getTimeFilter());
 			return super.onOptionsItemSelected(item);
 		}
+		return false;
 	}
 
 	@Override
@@ -404,9 +419,15 @@ public class TrafficMap extends MapActivity implements LocationListener {
 
 	private class GetReportTask extends
 			AsyncTask<Void, String, ArrayList<Report>> {
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+
+		}
 
 		@Override
-		protected ArrayList<Report> doInBackground(Void... params) {
+		protected ArrayList<Report> doInBackground(Void...values) {
 			// TODO Auto-generated method stub
 			ReportGetter mReportGetter = new ReportGetter(new HoaHelper(
 					TrafficNetworkClient.ADDRESS));
@@ -437,9 +458,11 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			if (result == null) {
 				return;
 			}
-
+			setProgressBarIndeterminateVisibility(false);
 			drawIncidentOverlay(result);
 		}
+
+		
 	}
 
 }

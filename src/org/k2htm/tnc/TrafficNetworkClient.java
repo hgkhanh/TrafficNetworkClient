@@ -13,21 +13,16 @@ public class TrafficNetworkClient extends Application {
 	public static final String TAG = "Application Object";
 
 	public ArrayList<Report> getReportList() {
-		Log.i(TAG,"Get get");
-		Log.i(TAG,"getReportList:"+reportList.toString());
-		Log.i(TAG,reportList.size()+"!");
 		return reportList;
 	}
 
 	public void setReportList(ArrayList<Report> reportList) {
-		Log.i(TAG,reportList.toString());
-		Log.i(TAG,reportList.size()+"!");
 		this.reportList = reportList;
 	}
 
 	public static final int DEFAULT_TIME_FILTER = -1;
 	public static final String DEFAULT_USER = "Guest";
-	public static final String ADDRESS = "192.168.0.100:8080";
+	public static final String ADDRESS = "192.168.168.4:8080";
 
 	@Override
 	public void onCreate() {
