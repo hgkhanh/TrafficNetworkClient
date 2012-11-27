@@ -38,6 +38,7 @@ public class ReportGetter {
 	public static final String TYPE_TAG = "type";
 	public static final String IMAGE_TAG = "image";
 	public static final String TAG = "ReportGetter";
+	public static final String ID_TAG = "id";
 
 	public ReportGetter(ReportGetHelper reportGetHelper) {
 		// TODO Auto-generated constructor stub
@@ -78,7 +79,7 @@ public class ReportGetter {
 			// new InputStream from xmlStrConverted
 			is = new ByteArrayInputStream(xmlStrConverted.getBytes());
 			// pasrse (inputStream)XMLString
-			String username = "", image = "", des = "", lat = "", lng = "", time = "", type = "";
+			String username = "", image = "", des = "", lat = "", lng = "", time = "", type = "",id="";
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
 					.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -99,10 +100,11 @@ public class ReportGetter {
 					des = getTagValue(DESCRIPTION_TAG, eElement);
 					type = getTagValue(TYPE_TAG, eElement);
 					image = getTagValue(IMAGE_TAG, eElement);
+					id = getTagValue(ID_TAG,eElement);
 
 				}
 
-				Report report = new Report(username, Long.parseLong(time),
+				Report report = new Report(Integer.parseInt(id),username, Long.parseLong(time),
 						Integer.parseInt(lat), Integer.parseInt(lng), des,
 						Short.parseShort(type), image);
 				inputRepList.add(report);
@@ -196,7 +198,10 @@ public class ReportGetter {
 				Element image = doc.createElement(IMAGE_TAG);
 				image.appendChild(doc.createTextNode(curReport.getImage()));
 				report.appendChild(image);
-
+				// id elements
+				Element id = doc.createElement(ID_TAG);
+				id.appendChild(doc.createTextNode(curReport.getCautionID()+""));
+				report.appendChild(id);
 				// // write the content into xml file
 				// TransformerFactory transformerFactory = TransformerFactory
 				// .newInstance();

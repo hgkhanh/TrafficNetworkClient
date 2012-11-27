@@ -11,6 +11,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
+import org.k2htm.tnc.TrafficNetworkClient;
 
 import android.util.Log;
 import edu.k2htm.datahelper.Caution;
@@ -33,6 +34,7 @@ public class HoaHelper implements CautionHelper, CheckUserHelper,
 
 	// public static final String
 	private String destination = "10.10.131.43:8080";
+	public static final String ROOT="/TrafficNetWork";
 	public static final String CHECK_USER = "/TrafficNetWork/Login";
 	public static final String REGISTRATION = "/TrafficNetWork/Register";
 	public static final String SEND_COMMET = "/TrafficNetWork/SendComment";
@@ -67,12 +69,16 @@ public class HoaHelper implements CautionHelper, CheckUserHelper,
 	public void report(String username, short type, long time, int lat,
 			int lng, File image, String comment) throws Exception {
 		// TODO Auto-generated method stub
+		Log.i(TAG,"report() start");
 		executeRequest.setTag(Caution.DB_CAUTION_LAT_COL,
 				Caution.DB_CAUTION_LNG_COL, Caution.DB_CAUTION_DESCRIPTION_COL,
 				Caution.DB_CAUTION_TIME_COL, Caution.DB_CAUTION_USERNAME_COL,
 				"status", Caution.DB_CAUTION_IMAGE_COL);
+
+		Log.i(TAG,"execRequest setTag ok");
 		Scanner scanner = new Scanner(executeRequest.executePost(lat, lng,
 				comment, time, username, image, null, destination + SEND_INFO));
+		
 		if (scanner.next().equals(DataHelper.STATUS_FAIL))
 			throw new Exception();
 	}
@@ -206,8 +212,14 @@ public class HoaHelper implements CautionHelper, CheckUserHelper,
 		URI uri = URIUtils.createURI("http", destination, -1, GET_REPORT,
 				URLEncodedUtils.format(qparams, "UTF-8"), null);
 		HttpGet httpget = new HttpGet(uri);
-
-		return ReportGetter.parseReportXml(executeRequest.execute(httpget));
+		ArrayList<Report> res = ReportGetter.parseReportXml(executeRequest.execute(httpget));
+		if(res!=null){
+			for(int i=0;i<res.size();i++){
+				res.get(i).setImage("http://"+destination+ROOT+"/"+res.get(i).getImage());
+				Log.d(TAG,"Img:"+i+":"+res.get(i).getImage());
+			}
+		}
+		return res;
 	}
 
 	public static void main(String args[]) throws Exception {

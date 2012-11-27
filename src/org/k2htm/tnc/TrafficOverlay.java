@@ -21,12 +21,13 @@ public class TrafficOverlay extends BalloonItemizedOverlay<IncidentOverlayItem> 
 	public static final String TAG = "Traffic Overlay";
 	private ArrayList<IncidentOverlayItem> incidents = new ArrayList<IncidentOverlayItem>();
 	private Location currentLocation;
-
-	public TrafficOverlay(Drawable defaultMarker, MapView mapView) {
+	private TrafficMap map;
+	public TrafficOverlay(Drawable defaultMarker, MapView mapView,TrafficMap map) {
 		super(defaultMarker, mapView);
 		// TODO Auto-generated constructor stub
 		boundCenterBottom(defaultMarker);
 		mContext = mapView.getContext();
+		this.map=map;
 		populate();
 	}
 
@@ -85,13 +86,15 @@ public class TrafficOverlay extends BalloonItemizedOverlay<IncidentOverlayItem> 
 		// mContext.startActivity(detailActIntent);
 		// }
 		Log.i(TAG, "item tapped :" + item.toString());
+
+		Log.i(TAG, "report input :" +item.getReport().toString());
 		String incidentType = item.getTitle();
 		if (!incidentType.equals("Me")) {
 			// String incidentDes = incidents.get(index).getSnippet();
 			// GeoPoint incidentPoint = incidents.get(index).getPoint();
 			//Log.i(TAG,"Tap tap tap:"+index);
 			try {
-				TrafficMap.showDetail(item);
+				map.showDetail(item);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

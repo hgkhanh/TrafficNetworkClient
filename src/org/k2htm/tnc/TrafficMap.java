@@ -1,5 +1,10 @@
 package org.k2htm.tnc;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +12,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
@@ -21,6 +30,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -33,9 +43,7 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
 import edu.k2htm.clientHelper.HoaHelper;
-import edu.k2htm.datahelper.Comment;
 import edu.k2htm.datahelper.CommentGetter;
-import edu.k2htm.datahelper.DataHelper;
 import edu.k2htm.datahelper.Report;
 import edu.k2htm.datahelper.ReportGetter;
 
@@ -43,19 +51,21 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	private static MapController mapController;
 	private MapView mapView;
 	private LocationManager locationManager;
-	private static GeoPoint currentPoint;
+	private GeoPoint currentPoint;
 	private Location currentLocation = null;
 	private TrafficOverlay currPosOverlay;
 	private Button btnReport;
 	private TextView tvProvider;
+	private Bitmap tmpBitmapImage;
 	private boolean refreshing = false;
-	private static TextView tvUsername;
-	private static TextView tvType;
-	private static TrafficNetworkClient mApplication;
-	private static TextView tvDes;
+	private TextView tvUsername;
+	private TextView tvType;
+	private TrafficNetworkClient mApplication;
+	private TextView tvDes;
 	private MenuItem refreshMenuItem;
-	private static LinearLayout llDetail;
-	private static ListView lvComment;
+	private ImageView imvBig, imvSmall;
+	private LinearLayout llDetail, llPopupImage;
+	private ListView lvComment;
 	public static final int REQUEST_CODE = 100;
 	public static final String TAG = "Traffic Map";
 	public static final String LONG = "longitude";
@@ -81,7 +91,8 @@ public class TrafficMap extends MapActivity implements LocationListener {
 				getText(R.string.login_user_toast) + " : "
 						+ mApplication.getUser(), Toast.LENGTH_SHORT).show();
 		// find view
-
+		imvBig = (ImageView) findViewById(R.id.imvBig);
+		imvSmall = (ImageView) findViewById(R.id.imvSmall);
 		btnReport = (Button) findViewById(R.id.btnReport);
 		tvProvider = ((TextView) findViewById(R.id.providerText));
 		mapView = (MapView) findViewById(R.id.mapView);
@@ -90,6 +101,9 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		tvDes = (TextView) findViewById(R.id.tvDescription);
 		tvType = (TextView) findViewById(R.id.tvIncType);
 		tvUsername = (TextView) findViewById(R.id.tvUsername);
+		// hide view
+		llDetail.setVisibility(View.GONE);
+		imvBig.setVisibility(View.GONE);
 		// turn on zoom controller if device not support multitouch
 		if (getPackageManager().hasSystemFeature(
 				PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)) {
@@ -127,18 +141,14 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		animateToCurrentLocation();
 	}
 
-	public static void showDetail(IncidentOverlayItem overlayItem) throws Exception {
-		Log.i(TAG, "Show Detail");
-		
-		
-		Report curReport = overlayItem.getReport();
-		//THieu ID
-		dialogComment.show(mApplication, "Getting comment", "Please wait");
-		ShowDetailsWithComment comment = new ShowDetailsWithComment();
-		comment.execute();
-		
-		
+	public void showDetail(IncidentOverlayItem overlayItem) throws Exception {
+
 		llDetail.setVisibility(View.VISIBLE);
+		Log.i(TAG, "Show Detail");
+
+		Report curReport = overlayItem.getReport();
+		Log.i(TAG, "curReport: " + curReport.toString());
+
 		// tvType.setText(curReport.getType()+"");
 		String typeStr = "";
 		switch (curReport.getType()) {
@@ -157,41 +167,60 @@ public class TrafficMap extends MapActivity implements LocationListener {
 
 		tvType.setText(typeStr);
 		tvDes.setText(curReport.getDescription());
+		Log.i(TAG, "report descreiption" + curReport.getDescription());
 		tvUsername.setText(curReport.getUsername());
 		GeoPoint curPoint = new GeoPoint(curReport.getLat(), curReport.getLng());
 		if (curPoint != null) {
 			mapController.animateTo(curPoint);
 		}
+
+		// download image
+		GetImageTask getImageTask = new GetImageTask();
+		getImageTask.execute(overlayItem.getReport().getImage());
+
 	}
+
 	static ProgressDialog dialogComment;
-	private static class ShowDetailsWithComment extends AsyncTask<Void, Void, Void>{
+
+	private class ShowDetailsWithComment extends AsyncTask<Void, Void, Void> {
 		CommentItemAdapter adapter;
+
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+			setProgressBarIndeterminateVisibility(true);
+		}
+
 		@Override
 		protected Void doInBackground(Void... params) {
-			//THieu ID
-			int cautionID=1;
-			CommentGetter commentGetter=new CommentGetter(cautionID	, new HoaHelper(TrafficNetworkClient.ADDRESS));
-			
+			// THieu ID
+			int cautionID = 1;
+			CommentGetter commentGetter = new CommentGetter(cautionID,
+					new HoaHelper(TrafficNetworkClient.ADDRESS));
+
 			try {
-				adapter = new CommentItemAdapter(mApplication, commentGetter.getComments(cautionID));
+				adapter = new CommentItemAdapter(mApplication,
+						commentGetter.getComments(cautionID));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			
+
 			return null;
 		}
+
 		@Override
 		protected void onPostExecute(Void result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
 			dialogComment.dismiss();
 			lvComment.setAdapter(adapter);
-			
+
+			setProgressBarIndeterminateVisibility(true);
 		}
 	}
-	
+
 	public void hideDetail(View view) {
 		llDetail.setVisibility(View.GONE);
 	}
@@ -260,7 +289,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		List<Overlay> overlays = mapView.getOverlays();
 		overlays.remove(currPosOverlay);
 		Drawable marker = getResources().getDrawable(R.drawable.icon_you);
-		currPosOverlay = new TrafficOverlay(marker, mapView);
+		currPosOverlay = new TrafficOverlay(marker, mapView, this);
 		if (currentPoint != null) {
 			IncidentOverlayItem youItem = new IncidentOverlayItem(currentPoint,
 					"", "");
@@ -275,11 +304,11 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		List<Overlay> overlays = mapView.getOverlays();
 		// create
 		Drawable marker = getResources().getDrawable(R.drawable.indicator_jam);
-		TrafficOverlay jamPos = new TrafficOverlay(marker, mapView);
+		TrafficOverlay jamPos = new TrafficOverlay(marker, mapView, this);
 		marker = getResources().getDrawable(R.drawable.indicator_accident);
-		TrafficOverlay accidentPos = new TrafficOverlay(marker, mapView);
+		TrafficOverlay accidentPos = new TrafficOverlay(marker, mapView, this);
 		marker = getResources().getDrawable(R.drawable.indicator_blocked);
-		TrafficOverlay blockedPos = new TrafficOverlay(marker, mapView);
+		TrafficOverlay blockedPos = new TrafficOverlay(marker, mapView, this);
 
 		/*
 		 * read from ArrayList
@@ -367,7 +396,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		case R.id.map_refresh:
 			GetReportTask mGetReportTask = new GetReportTask();
 			mGetReportTask.execute();
-			
+
 			break;
 		case R.id.min10:
 			mApplication.setTimeFilter(10);
@@ -455,7 +484,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		locationManager.removeUpdates(this);
 	}
 
-	public static GeoPoint getCurrentPoint() {
+	public GeoPoint getCurrentPoint() {
 		return currentPoint;
 	}
 
@@ -470,7 +499,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		}
 
 		@Override
-		protected ArrayList<Report> doInBackground(Void...values) {
+		protected ArrayList<Report> doInBackground(Void... values) {
 			// TODO Auto-generated method stub
 			ReportGetter mReportGetter = new ReportGetter(new HoaHelper(
 					TrafficNetworkClient.ADDRESS));
@@ -503,9 +532,71 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			}
 			setProgressBarIndeterminateVisibility(false);
 			drawIncidentOverlay(result);
+
 		}
 
-		
 	}
 
+	
+
+	private class GetImageTask extends AsyncTask<String, String, Boolean> {
+
+		@Override
+		protected Boolean doInBackground(String... url) {
+			// TODO Auto-generated method stub
+			URL myFileUrl = null;
+			try {
+				// TEST
+//				myFileUrl = new URL(
+//						"http://www.belovedcars.com/wp-content/uploads/2012/03/2012-traffic-jam.jpg");
+				// END TEST
+				 myFileUrl = new URL(url[0]);
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				HttpURLConnection conn = (HttpURLConnection) myFileUrl
+						.openConnection();
+				conn.setDoInput(true);
+				conn.connect();
+				InputStream is = conn.getInputStream();
+				tmpBitmapImage = BitmapFactory.decodeStream(is);
+				return true;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return false;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			if (result) {
+
+				imvSmall.setImageBitmap(tmpBitmapImage);
+				imvBig.setImageBitmap(tmpBitmapImage);
+
+			} else {
+				Toast.makeText(TrafficMap.this, "Cannot download Image",
+						Toast.LENGTH_SHORT).show();
+			}
+		}
+
+	}
+
+	public void showComment(View v) {
+		// Get comment THieu ID
+		ShowDetailsWithComment comment = new ShowDetailsWithComment();
+		comment.execute();
+	}
+
+	public void hideImage(View v) {
+		imvBig.setVisibility(View.GONE);
+	}
+	public void showImage(View v) {
+		imvBig.setVisibility(View.VISIBLE);
+	}
 }

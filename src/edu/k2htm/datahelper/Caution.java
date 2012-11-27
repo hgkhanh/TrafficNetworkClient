@@ -53,8 +53,11 @@ public class Caution {
 	}
 	
 	public void report() throws Exception{
+
+		Log.i(TAG,"Caution.report() ");
 		cautionHelper.init();
 		cautionHelper.report(username,type, time, lat, lng, image, comment);
+		
 		Log.i(TAG, "Report finished");
 		cautionHelper.close();
 	}

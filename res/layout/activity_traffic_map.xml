@@ -100,7 +100,8 @@
         android:paddingBottom="30dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:paddingTop="10dp" >
+        android:paddingTop="10dp"
+        android:visibility="gone" >
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -225,42 +226,41 @@
             android:orientation="horizontal" >
 
             <LinearLayout
-                android:orientation="vertical"
+                android:id="@+id/llComment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/box_shadows_small" >
-				
-                <ListView 
+                android:background="@drawable/box_shadows_small"
+                android:clickable="true"
+                android:onClick="showComment"
+                android:orientation="vertical" >
+
+                <ListView
                     android:id="@+id/lvComment"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:stackFromBottom="true"
                     android:layout_weight="1"
-                    
-                    ></ListView>
-                <LinearLayout 
-                   	android:layout_width="match_parent"
-                   	android:layout_height="wrap_content"
-                   	android:orientation="horizontal"
-                    
-                    >
-                    <EditText 
+                    android:stackFromBottom="true" >
+                </ListView>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
+                    <EditText
                         android:id="@+id/edtComment"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Comment go here"
                         android:layout_weight="1"
-                        />
-                    <Button 
+                        android:hint="Write your comment" />
+
+                    <Button
                         android:id="@+id/btnEnterComment"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:text="Go"
                         android:layout_weight="3"
-                        
-                        
-                        />
+                        android:text="Go" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -271,16 +271,30 @@
                 android:layout_weight="3" >
 
                 <ImageView
-                    android:id="@+id/imbImage"
+                    android:id="@+id/imvSmall"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:adjustViewBounds="true"
                     android:background="@android:color/transparent"
+                    android:clickable="true"
+                    android:onClick="showImage"
                     android:scaleType="centerInside"
                     android:src="@android:drawable/ic_menu_gallery" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imvBig"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center"
+        android:adjustViewBounds="true"
+        android:clickable="true"
+        android:onClick="hideImage"
+        android:padding="20sp"
+        android:background="@drawable/box_shadows_small"
+        android:src="@android:drawable/ic_menu_gallery" />
 
 </RelativeLayout>

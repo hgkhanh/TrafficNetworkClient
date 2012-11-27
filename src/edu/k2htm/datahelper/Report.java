@@ -13,10 +13,9 @@ public class Report {
 	private String description;
 	private CautionHelper cautionHelper;
 	private short type;
-	public Report() {
-		// TODO Auto-generated constructor stub
-	}
-	public Report(String username, long time, int lat, int lng,
+	private int cautionID;
+
+	public Report(int cautionID,String username, long time, int lat, int lng,
 			String des, short type, String image) {
 		setUsername(username);
 		setTime(time);
@@ -25,6 +24,11 @@ public class Report {
 		setDescription(des);
 		setType(type);
 		setImage(image);
+		setCautionID(cautionID);
+	}
+
+	public Report() {
+		// TODO Auto-generated constructor stub
 	}
 
 	public String getUsername() {
@@ -102,5 +106,11 @@ public class Report {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public int getCautionID() {
+		return cautionID;
+	}
+	public void setCautionID(int cautionID) {
+		this.cautionID = cautionID;
 	}
 }

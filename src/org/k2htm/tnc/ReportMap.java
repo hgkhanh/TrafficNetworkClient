@@ -6,17 +6,18 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -25,6 +26,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -41,6 +43,9 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.OverlayItem;
 
+import edu.k2htm.clientHelper.HoaHelper;
+import edu.k2htm.datahelper.Caution;
+
 public class ReportMap extends MapActivity {
 	private MapController mapController;
 	private MapView map = null;
@@ -50,16 +55,20 @@ public class ReportMap extends MapActivity {
 	private ImageView imvImage;
 	private TextView tvLat, tvLong;
 	private EditText edtDes;
+	private TrafficNetworkClient mApplicaion;
 	private Spinner spnType;
 	private Uri imageUri;
-	private String imageUriStr;
+	private String imageUriStr = "";
 	public static final String TAG = "ReportMapActivity";
 	public static final int CODE_IMAGE_PICKER = 201;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.activity_report_map);
+		// app object
+		mApplicaion = (TrafficNetworkClient) getApplication();
 		// get view
 		btnConfirm = (Button) findViewById(R.id.btnConfirm);
 		tvLat = ((TextView) findViewById(R.id.latitudeText));
@@ -80,27 +89,50 @@ public class ReportMap extends MapActivity {
 				// TODO Auto-generated method stub
 				// check null type edt
 
-				if (edtDes.getText().toString().equals("")) {
-					edtDes.setText(" ");
-				}
-				Log.i(TAG, "asdf");
 				try {
-					imageUriStr = imageUri.toString();
-				} catch (Exception e) {
+					if (edtDes.getText().toString().equals("")) {
+						edtDes.setText(" ");
+					}
+					imageUriStr = getRealPathFromURI(imageUri);
 
+					Log.i(TAG, "asdf");
+					Log.i(TAG,
+							"spinner select : "
+									+ spnType.getSelectedItemPosition()
+									+ "\nClick confirm "
+									+ tvLat.getText().toString() + " "
+									+ tvLong.getText().toString()
+									+ "\nImage uri:    " + imageUriStr);
+					Log.i(TAG, "asdf");
+					// input
+					String username = mApplicaion.getUser();
+					short type = (short) spnType.getSelectedItemPosition();
+					int lat = Integer.parseInt(tvLat.getText().toString());
+					int lng = Integer.parseInt(tvLong.getText().toString());
+					File image;
+					if (imageUriStr.equals("")) {
+						image = null;
+					} else {
+
+						image = new File(imageUriStr);
+
+					}
+					String comment = edtDes.getText().toString();
+
+					// new Caution object
+					Caution mCaution = new Caution(username, type, lat, lng,
+							image, comment, new HoaHelper(
+									TrafficNetworkClient.ADDRESS));
+					// SendToServer
+					new SendReportTask().execute(mCaution);
+					
+					// writeToFile(Integer.parseInt(tvLat.getText().toString()),
+					// Integer.parseInt((tvLong.getText().toString())),
+					// spnType.getSelectedItemPosition(), edtDes.getText()
+					// .toString(), imageUriStr);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				Log.i(TAG, "asdf");
-				Log.i(TAG,
-						"spinner select : " + spnType.getSelectedItemPosition()
-								+ "\nClick confirm "
-								+ tvLat.getText().toString() + " "
-								+ tvLong.getText().toString() + "\nImage uri "
-								+ imageUriStr);
-				Log.i(TAG, "asdf");
-				writeToFile(Integer.parseInt(tvLat.getText().toString()),
-						Integer.parseInt((tvLong.getText().toString())),
-						spnType.getSelectedItemPosition(), edtDes.getText()
-								.toString(), imageUriStr);
 			}
 		});
 
@@ -138,9 +170,19 @@ public class ReportMap extends MapActivity {
 
 		Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		File photo = new File(Environment.getExternalStorageDirectory(),
-				"Pic.jpg");
+				"tmp.jpg");
+		// "tmp.jpg");
+		// File photo=null;
+		// try {
+		// photo =File.createTempFile("", ".jpg");
+		//
+		// } catch (IOException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 		takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photo));
-		imageUri = Uri.fromFile(photo);
+		imageUriStr = photo.getAbsolutePath();
+		imageUri = Uri.parse(imageUriStr);
 		String pickTitle = "Select or take a new Picture";
 		Intent chooserIntent = Intent.createChooser(pickIntent, pickTitle);
 		chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
@@ -402,4 +444,66 @@ public class ReportMap extends MapActivity {
 			ioe.printStackTrace();
 		}
 	}
+
+	public class SendReportTask extends AsyncTask<Caution, String, Void> {
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+			// Bat xoay xoay
+			Log.i(TAG, "xoay xoay on");
+			setProgressBarIndeterminateVisibility(true);
+		}
+
+		@Override
+		protected Void doInBackground(Caution... mCaution) {
+			// TODO Auto-generated method stub
+			try {
+				mCaution[0].report();
+				Log.i(TAG, "Sending caution ok");
+				publishProgress("Send caution ok");
+				if (mCaution[0].getImage() != null)
+					mCaution[0].getImage().delete();
+			} catch (Exception e) {
+				publishProgress(getText(R.string.network_error) + "");
+			}
+			return null;
+		}
+
+		@Override
+		protected void onProgressUpdate(String... values) {
+			// TODO Auto-generated method stub
+			super.onProgressUpdate(values);
+			if (values[0].equals("Send caution ok")) {
+				Toast.makeText(ReportMap.this, "Report successfully",
+						Toast.LENGTH_SHORT).show();
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			// tat xoay xoay
+			setProgressBarIndeterminateVisibility(false);
+			Intent oIntet = new Intent(ReportMap.this,TrafficMap.class);
+			startActivity(oIntet);
+		}
+	}
+
+	private String getRealPathFromURI(Uri contentUri) {
+		try {
+			String[] proj = { MediaStore.Images.Media.DATA };
+			CursorLoader loader = new CursorLoader(ReportMap.this, contentUri,
+					proj, null, null, null);
+			Cursor cursor = loader.loadInBackground();
+			int column_index = cursor
+					.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+			cursor.moveToFirst();
+			return cursor.getString(column_index);
+		} catch (NullPointerException e) {
+			return imageUriStr;
+		}
+	}
+
 }

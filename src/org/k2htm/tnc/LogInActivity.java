@@ -119,7 +119,7 @@ public class LogInActivity extends Activity {
 		protected void onPreExecute() {
 			// TODO Auto-generated method stub
 			super.onPreExecute();
-			setProgressBarIndeterminate(true);
+			setProgressBarIndeterminateVisibility(true);
 		}
 
 		@Override
@@ -154,7 +154,6 @@ public class LogInActivity extends Activity {
 		protected void onPostExecute(Boolean result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
-			setProgressBarIndeterminate(false);
 			check_usr_ok = result;
 			Log.i(TAG, check_usr_ok + "!");
 			if (check_usr_ok) {
@@ -181,6 +180,8 @@ public class LogInActivity extends Activity {
 						R.string.toast_usr_pass_check_failed,
 						Toast.LENGTH_SHORT).show();
 			}
+
+			setProgressBarIndeterminateVisibility(false);
 		}
 	}
 }
