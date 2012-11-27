@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
@@ -22,13 +23,14 @@ public class LogInActivity extends Activity {
 	private Button btnConfirm;
 	private TrafficNetworkClient mApplication;
 	public static final String TAG = "Login Activity";
-	
+
 	private boolean check_usr_ok = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.login_layout);
 		// app obj
 		mApplication = (TrafficNetworkClient) getApplication();
@@ -114,9 +116,17 @@ public class LogInActivity extends Activity {
 		Boolean result;
 
 		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+			setProgressBarIndeterminate(true);
+		}
+
+		@Override
 		protected Boolean doInBackground(String... params) {
 			// TODO Auto-generated method stub
-			User mUser = new User(params[0], params[1], new HoaHelper(TrafficNetworkClient.ADDRESS));
+			User mUser = new User(params[0], params[1], new HoaHelper(
+					TrafficNetworkClient.ADDRESS));
 			try {
 
 				Log.i(TAG, "doinbackground result=checkuser()");
@@ -144,6 +154,7 @@ public class LogInActivity extends Activity {
 		protected void onPostExecute(Boolean result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
+			setProgressBarIndeterminate(false);
 			check_usr_ok = result;
 			Log.i(TAG, check_usr_ok + "!");
 			if (check_usr_ok) {
@@ -168,7 +179,7 @@ public class LogInActivity extends Activity {
 				Log.i(TAG, "check_usr_ok==false");
 				Toast.makeText(LogInActivity.this,
 						R.string.toast_usr_pass_check_failed,
-						Toast.LENGTH_SHORT).show();  
+						Toast.LENGTH_SHORT).show();
 			}
 		}
 	}

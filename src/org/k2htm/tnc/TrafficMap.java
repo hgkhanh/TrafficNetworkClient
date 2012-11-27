@@ -3,6 +3,7 @@ package org.k2htm.tnc;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -21,6 +22,7 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +33,9 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
 import edu.k2htm.clientHelper.HoaHelper;
+import edu.k2htm.datahelper.Comment;
+import edu.k2htm.datahelper.CommentGetter;
+import edu.k2htm.datahelper.DataHelper;
 import edu.k2htm.datahelper.Report;
 import edu.k2htm.datahelper.ReportGetter;
 
@@ -50,6 +55,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	private static TextView tvDes;
 	private MenuItem refreshMenuItem;
 	private static LinearLayout llDetail;
+	private static ListView lvComment;
 	public static final int REQUEST_CODE = 100;
 	public static final String TAG = "Traffic Map";
 	public static final String LONG = "longitude";
@@ -80,6 +86,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		tvProvider = ((TextView) findViewById(R.id.providerText));
 		mapView = (MapView) findViewById(R.id.mapView);
 		llDetail = (LinearLayout) findViewById(R.id.llDetail);
+		lvComment = (ListView) findViewById(R.id.lvComment);
 		tvDes = (TextView) findViewById(R.id.tvDescription);
 		tvType = (TextView) findViewById(R.id.tvIncType);
 		tvUsername = (TextView) findViewById(R.id.tvUsername);
@@ -120,9 +127,17 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		animateToCurrentLocation();
 	}
 
-	public static void showDetail(IncidentOverlayItem overlayItem) {
+	public static void showDetail(IncidentOverlayItem overlayItem) throws Exception {
 		Log.i(TAG, "Show Detail");
+		
+		
 		Report curReport = overlayItem.getReport();
+		//THieu ID
+		dialogComment.show(mApplication, "Getting comment", "Please wait");
+		ShowDetailsWithComment comment = new ShowDetailsWithComment();
+		comment.execute();
+		
+		
 		llDetail.setVisibility(View.VISIBLE);
 		// tvType.setText(curReport.getType()+"");
 		String typeStr = "";
@@ -148,7 +163,35 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			mapController.animateTo(curPoint);
 		}
 	}
-
+	static ProgressDialog dialogComment;
+	private static class ShowDetailsWithComment extends AsyncTask<Void, Void, Void>{
+		CommentItemAdapter adapter;
+		@Override
+		protected Void doInBackground(Void... params) {
+			//THieu ID
+			int cautionID=1;
+			CommentGetter commentGetter=new CommentGetter(cautionID	, new HoaHelper(TrafficNetworkClient.ADDRESS));
+			
+			try {
+				adapter = new CommentItemAdapter(mApplication, commentGetter.getComments(cautionID));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+			return null;
+		}
+		@Override
+		protected void onPostExecute(Void result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			dialogComment.dismiss();
+			lvComment.setAdapter(adapter);
+			
+		}
+	}
+	
 	public void hideDetail(View view) {
 		llDetail.setVisibility(View.GONE);
 	}
@@ -322,7 +365,6 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		// TODO Auto-generated method stub
 		switch (item.getItemId()) {
 		case R.id.map_refresh:
-			setProgressBarIndeterminateVisibility(true);
 			GetReportTask mGetReportTask = new GetReportTask();
 			mGetReportTask.execute();
 			
@@ -423,6 +465,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		protected void onPreExecute() {
 			// TODO Auto-generated method stub
 			super.onPreExecute();
+			setProgressBarIndeterminateVisibility(true);
 
 		}
 

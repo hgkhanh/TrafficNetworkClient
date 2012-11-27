@@ -90,7 +90,12 @@ public class TrafficOverlay extends BalloonItemizedOverlay<IncidentOverlayItem> 
 			// String incidentDes = incidents.get(index).getSnippet();
 			// GeoPoint incidentPoint = incidents.get(index).getPoint();
 			//Log.i(TAG,"Tap tap tap:"+index);
-			TrafficMap.showDetail(item);
+			try {
+				TrafficMap.showDetail(item);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return true;
 	}

@@ -99,7 +99,6 @@
         android:orientation="vertical"
         android:paddingBottom="30dp"
         android:paddingLeft="10dp"
-        android:visibility="gone"
         android:paddingRight="10dp"
         android:paddingTop="10dp" >
 
@@ -226,19 +225,43 @@
             android:orientation="horizontal" >
 
             <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/box_shadows_small" >
-
-                <TextView
-                    android:id="@+id/tvDescription"
+				
+                <ListView 
+                    android:id="@+id/lvComment"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:paddingLeft="10dp"
-                    android:text="Comment Go here"
-                    android:textSize="20dp" />
+                    android:layout_height="0dp"
+                    android:stackFromBottom="true"
+                    android:layout_weight="1"
+                    
+                    ></ListView>
+                <LinearLayout 
+                   	android:layout_width="match_parent"
+                   	android:layout_height="wrap_content"
+                   	android:orientation="horizontal"
+                    
+                    >
+                    <EditText 
+                        android:id="@+id/edtComment"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Comment go here"
+                        android:layout_weight="1"
+                        />
+                    <Button 
+                        android:id="@+id/btnEnterComment"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Go"
+                        android:layout_weight="3"
+                        
+                        
+                        />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
