@@ -175,7 +175,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		calendar.setTimeInMillis(curReport.getTime());
 		tvTime.setText(formatter.format(calendar.getTime()) + "");
 		Log.i(TAG, "report descreiption" + curReport.getDescription());
-		tvUsername.setText(curReport.getUsername()); 
+		//tvUsername.setText(curReport.getUsername()); 
 		GeoPoint curPoint = new GeoPoint(curReport.getLat(), curReport.getLng());
 		if (curPoint != null) {
 			mapController.animateTo(curPoint);
