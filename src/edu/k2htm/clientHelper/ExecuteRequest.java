@@ -47,7 +47,7 @@ public class ExecuteRequest {
 
 	public String executePost(int firstCoordinate, int secondCoordinate,
 			String comment, long time, String username, File file,
-			String TrafficStatus, String StringUrlDestiantion) throws Exception {
+			short TrafficStatus, String StringUrlDestiantion) throws Exception {
 		Log.d(TAG, "execute Post:"+StringUrlDestiantion);
 		HttpPost postRequest = new HttpPost("http://"+StringUrlDestiantion);
 		Log.d(TAG, "execute Post:prepare multipart");
@@ -58,7 +58,7 @@ public class ExecuteRequest {
 		multiPartEntity.addPart(this.comment, new StringBody(comment != null ? comment : ""));
 		multiPartEntity.addPart(this.time, new StringBody("" + time));
 		multiPartEntity.addPart(this.username, new StringBody("" + username));
-		multiPartEntity	.addPart(this.status, new StringBody("" + TrafficStatus));
+		multiPartEntity	.addPart(this.status, new StringBody(Short.toString(TrafficStatus)));
 		Log.d(TAG, "execute Post:prepare 1");
 		if(file!=null){
 		FileBody fileBody = new FileBody(file, "application/octect-stream");

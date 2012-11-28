@@ -33,7 +33,6 @@ public class TrafficOverlay extends BalloonItemizedOverlay<IncidentOverlayItem> 
 
 	public void setCurrentLocation(Location loc) {
 		this.currentLocation = loc;
-		Log.i(TAG, "set currentLocation:" + currentLocation.toString());
 	}
 
 	@Override

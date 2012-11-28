@@ -5,6 +5,7 @@ import android.util.Log;
 public class Report {
 	public static final String TAG = "Report";
 	public static final String PERIOD = "Period";
+	
 	private String username;
 	private long time;
 	private int lat;

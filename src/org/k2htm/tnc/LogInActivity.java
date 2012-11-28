@@ -110,6 +110,7 @@ public class LogInActivity extends Activity {
 		// TODO Auto-generated method stub
 		super.onResume();
 		btnReg.setTextColor(0xFF000000); // black
+		setProgressBarIndeterminateVisibility(false);
 	}
 
 	private class LoginTask extends AsyncTask<String, String, Boolean> {
@@ -131,6 +132,9 @@ public class LogInActivity extends Activity {
 
 				Log.i(TAG, "doinbackground result=checkuser()");
 				result = mUser.checkUser();
+				// TEST
+				result = true;
+				// END TEST
 
 				Log.i(TAG, "result=checkuser() ook\n result = " + result);
 			} catch (Exception e) {

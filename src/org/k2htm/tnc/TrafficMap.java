@@ -5,17 +5,17 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
@@ -61,7 +61,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	private TextView tvUsername;
 	private TextView tvType;
 	private TrafficNetworkClient mApplication;
-	private TextView tvDes;
+	private TextView tvDes, tvTime;
 	private MenuItem refreshMenuItem;
 	private ImageView imvBig, imvSmall;
 	private LinearLayout llDetail, llPopupImage;
@@ -97,10 +97,11 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		tvProvider = ((TextView) findViewById(R.id.providerText));
 		mapView = (MapView) findViewById(R.id.mapView);
 		llDetail = (LinearLayout) findViewById(R.id.llDetail);
-		lvComment = (ListView) findViewById(R.id.lvComment);
+		// lvComment = (ListView) findViewById(R.id.lvComment);
 		tvDes = (TextView) findViewById(R.id.tvDescription);
 		tvType = (TextView) findViewById(R.id.tvIncType);
 		tvUsername = (TextView) findViewById(R.id.tvUsername);
+		tvTime = (TextView) findViewById(R.id.tvTime);
 		// hide view
 		llDetail.setVisibility(View.GONE);
 		imvBig.setVisibility(View.GONE);
@@ -167,8 +168,14 @@ public class TrafficMap extends MapActivity implements LocationListener {
 
 		tvType.setText(typeStr);
 		tvDes.setText(curReport.getDescription());
+		// Show time
+		String dateFormat  ="hh:mm dd/MM/yyyy ";
+		DateFormat formatter = new SimpleDateFormat(dateFormat);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(curReport.getTime());
+		tvTime.setText(formatter.format(calendar.getTime()) + "");
 		Log.i(TAG, "report descreiption" + curReport.getDescription());
-		tvUsername.setText(curReport.getUsername());
+		tvUsername.setText(curReport.getUsername()); 
 		GeoPoint curPoint = new GeoPoint(curReport.getLat(), curReport.getLng());
 		if (curPoint != null) {
 			mapController.animateTo(curPoint);
@@ -179,8 +186,6 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		getImageTask.execute(overlayItem.getReport().getImage());
 
 	}
-
-	static ProgressDialog dialogComment;
 
 	private class ShowDetailsWithComment extends AsyncTask<Void, Void, Void> {
 		CommentItemAdapter adapter;
@@ -214,7 +219,6 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		protected void onPostExecute(Void result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
-			dialogComment.dismiss();
 			lvComment.setAdapter(adapter);
 
 			setProgressBarIndeterminateVisibility(true);
@@ -292,7 +296,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		currPosOverlay = new TrafficOverlay(marker, mapView, this);
 		if (currentPoint != null) {
 			IncidentOverlayItem youItem = new IncidentOverlayItem(currentPoint,
-					"", "");
+					"You are here!", "");
 			currPosOverlay.addOverlay(youItem);
 			overlays.add(currPosOverlay);
 			currPosOverlay.setCurrentLocation(currentLocation);
@@ -472,7 +476,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		super.onResume();
 		locationManager
 				.requestLocationUpdates(getBestProvider(), 1000, 1, this);
-
+		setProgressBarIndeterminateVisibility(false);
 		GetReportTask mGetReportTask = new GetReportTask();
 		mGetReportTask.execute();
 	}
@@ -537,8 +541,6 @@ public class TrafficMap extends MapActivity implements LocationListener {
 
 	}
 
-	
-
 	private class GetImageTask extends AsyncTask<String, String, Boolean> {
 
 		@Override
@@ -547,10 +549,10 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			URL myFileUrl = null;
 			try {
 				// TEST
-//				myFileUrl = new URL(
-//						"http://www.belovedcars.com/wp-content/uploads/2012/03/2012-traffic-jam.jpg");
+				// myFileUrl = new URL(
+				// "http://www.belovedcars.com/wp-content/uploads/2012/03/2012-traffic-jam.jpg");
 				// END TEST
-				 myFileUrl = new URL(url[0]);
+				myFileUrl = new URL(url[0]);
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -596,6 +598,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	public void hideImage(View v) {
 		imvBig.setVisibility(View.GONE);
 	}
+
 	public void showImage(View v) {
 		imvBig.setVisibility(View.VISIBLE);
 	}

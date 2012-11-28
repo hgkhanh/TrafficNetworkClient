@@ -69,15 +69,15 @@ public class HoaHelper implements CautionHelper, CheckUserHelper,
 	public void report(String username, short type, long time, int lat,
 			int lng, File image, String comment) throws Exception {
 		// TODO Auto-generated method stub
-		Log.i(TAG,"report() start");
+		Log.i(TAG,"report() start"+type);
 		executeRequest.setTag(Caution.DB_CAUTION_LAT_COL,
 				Caution.DB_CAUTION_LNG_COL, Caution.DB_CAUTION_DESCRIPTION_COL,
 				Caution.DB_CAUTION_TIME_COL, Caution.DB_CAUTION_USERNAME_COL,
-				"status", Caution.DB_CAUTION_IMAGE_COL);
+				Caution.DB_CAUTION_TYPE_COL, Caution.DB_CAUTION_IMAGE_COL);
 
 		Log.i(TAG,"execRequest setTag ok");
 		Scanner scanner = new Scanner(executeRequest.executePost(lat, lng,
-				comment, time, username, image, null, destination + SEND_INFO));
+				comment, time, username, image, type, destination + SEND_INFO));
 		
 		if (scanner.next().equals(DataHelper.STATUS_FAIL))
 			throw new Exception();

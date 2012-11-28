@@ -18,6 +18,7 @@ public class IncidentOverlayItem extends OverlayItem {
 		super(new GeoPoint(report.getLat(), report.getLng()), report
 				.getUsername(), report.getDescription());
 		this.report = report;
+		
 
 	}
 

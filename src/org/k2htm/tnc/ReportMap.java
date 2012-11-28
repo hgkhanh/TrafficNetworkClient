@@ -94,8 +94,6 @@ public class ReportMap extends MapActivity {
 						edtDes.setText(" ");
 					}
 					imageUriStr = getRealPathFromURI(imageUri);
-
-					Log.i(TAG, "asdf");
 					Log.i(TAG,
 							"spinner select : "
 									+ spnType.getSelectedItemPosition()
@@ -103,7 +101,6 @@ public class ReportMap extends MapActivity {
 									+ tvLat.getText().toString() + " "
 									+ tvLong.getText().toString()
 									+ "\nImage uri:    " + imageUriStr);
-					Log.i(TAG, "asdf");
 					// input
 					String username = mApplicaion.getUser();
 					short type = (short) spnType.getSelectedItemPosition();
@@ -123,9 +120,15 @@ public class ReportMap extends MapActivity {
 					Caution mCaution = new Caution(username, type, lat, lng,
 							image, comment, new HoaHelper(
 									TrafficNetworkClient.ADDRESS));
+					Log.i(TAG, "Create report : " + "\nusername : " + username
+							+ "\ntype" + type + "\nCLat:Lng "
+							+ tvLat.getText().toString() + ":" +tvLong.getText().toString() 
+							+ "\nDescription :" + comment
+							+ tvLong.getText().toString() + "\nImage uri: "
+							+ imageUriStr);
+  
 					// SendToServer
 					new SendReportTask().execute(mCaution);
-					
 					// writeToFile(Integer.parseInt(tvLat.getText().toString()),
 					// Integer.parseInt((tvLong.getText().toString())),
 					// spnType.getSelectedItemPosition(), edtDes.getText()
@@ -133,6 +136,8 @@ public class ReportMap extends MapActivity {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+
+				finish();
 			}
 		});
 
@@ -230,14 +235,13 @@ public class ReportMap extends MapActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
-
+		setProgressBarIndeterminateVisibility(false);
 		me.enableCompass();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-
 		me.disableCompass();
 	}
 
@@ -452,6 +456,8 @@ public class ReportMap extends MapActivity {
 			super.onPreExecute();
 			// Bat xoay xoay
 			Log.i(TAG, "xoay xoay on");
+			Toast.makeText(ReportMap.this, "Please wait...", Toast.LENGTH_SHORT)
+					.show();
 			setProgressBarIndeterminateVisibility(true);
 		}
 
@@ -475,8 +481,7 @@ public class ReportMap extends MapActivity {
 			// TODO Auto-generated method stub
 			super.onProgressUpdate(values);
 			if (values[0].equals("Send caution ok")) {
-				Toast.makeText(ReportMap.this, "Report successfully",
-						Toast.LENGTH_SHORT).show();
+				Log.i(TAG, "report success");
 			}
 		}
 
@@ -485,8 +490,10 @@ public class ReportMap extends MapActivity {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
 			// tat xoay xoay
+			Toast.makeText(ReportMap.this, "Report successfully",
+					Toast.LENGTH_SHORT).show();
 			setProgressBarIndeterminateVisibility(false);
-			Intent oIntet = new Intent(ReportMap.this,TrafficMap.class);
+			Intent oIntet = new Intent(ReportMap.this, TrafficMap.class);
 			startActivity(oIntet);
 		}
 	}
