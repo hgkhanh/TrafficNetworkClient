@@ -46,7 +46,10 @@
             android:name=".TrafficMap"
             android:label="@string/title_activity_traffic_map" >
         </activity>
-
+ <activity
+            android:name=".IncidentDetailActivity"
+            android:label="@string/title_activity_traffic_map" >
+        </activity>
         <uses-library
             android:name="com.google.android.maps"
             android:required="true" />

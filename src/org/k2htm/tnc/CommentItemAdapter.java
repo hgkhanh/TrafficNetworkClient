@@ -22,7 +22,7 @@ public class CommentItemAdapter extends BaseAdapter {
 	
 	public CommentItemAdapter(Context context, ArrayList<Comment> comments) {
 		super();
-		inflater.from(context);
+		inflater = LayoutInflater.from(context);
 		this.context = context;
 		this.comments = comments;
 		holder = new ViewHolder();
@@ -49,7 +49,7 @@ public class CommentItemAdapter extends BaseAdapter {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (convertView == null) {
-			inflater.inflate(R.layout.comment_item_listview, null);
+			convertView = inflater.inflate(R.layout.comment_item_listview, null);
 			convertView.setTag(holder);
 		} else {
 			convertView.getTag();

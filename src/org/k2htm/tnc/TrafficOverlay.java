@@ -85,10 +85,9 @@ public class TrafficOverlay extends BalloonItemizedOverlay<IncidentOverlayItem> 
 		// mContext.startActivity(detailActIntent);
 		// }
 		Log.i(TAG, "item tapped :" + item.toString());
-
-		Log.i(TAG, "report input :" +item.getReport().toString());
-		String incidentType = item.getTitle();
-		if (!incidentType.equals("Me")) {
+		Log.i(TAG, "OverlayItem getTitle :" +item.getTitle());
+		String incidentTitle = item.getTitle();
+		if (!incidentTitle.equals("You are here!")) {
 			// String incidentDes = incidents.get(index).getSnippet();
 			// GeoPoint incidentPoint = incidents.get(index).getPoint();
 			//Log.i(TAG,"Tap tap tap:"+index);

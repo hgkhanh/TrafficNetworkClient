@@ -91,7 +91,7 @@ public class ReportMap extends MapActivity {
 
 				try {
 					if (edtDes.getText().toString().equals("")) {
-						edtDes.setText(" ");
+						edtDes.setText("No Description.");
 					}
 					imageUriStr = getRealPathFromURI(imageUri);
 					Log.i(TAG,
@@ -122,11 +122,11 @@ public class ReportMap extends MapActivity {
 									TrafficNetworkClient.ADDRESS));
 					Log.i(TAG, "Create report : " + "\nusername : " + username
 							+ "\ntype" + type + "\nCLat:Lng "
-							+ tvLat.getText().toString() + ":" +tvLong.getText().toString() 
-							+ "\nDescription :" + comment
-							+ tvLong.getText().toString() + "\nImage uri: "
-							+ imageUriStr);
-  
+							+ tvLat.getText().toString() + ":"
+							+ tvLong.getText().toString() + "\nDescription :"
+							+ comment + tvLong.getText().toString()
+							+ "\nImage uri: " + imageUriStr);
+
 					// SendToServer
 					new SendReportTask().execute(mCaution);
 					// writeToFile(Integer.parseInt(tvLat.getText().toString()),
@@ -223,6 +223,7 @@ public class ReportMap extends MapActivity {
 
 	public void centerToCurrentLocation(View view) {
 		animateToCurrentLocation();
+
 	}
 
 	public void animateToCurrentLocation() {
@@ -384,69 +385,6 @@ public class ReportMap extends MapActivity {
 				iBundle.getInt(TrafficMap.LONG));
 		Log.i("report", "lat: " + iBundle.getInt(TrafficMap.LAT) + "\nlong:"
 				+ iBundle.getInt(TrafficMap.LONG));
-	}
-
-	private void writeToFile(int latitude, int longitude, int type,
-			String description, String imageUri) {
-		Log.i(TAG, "asdf");
-		try { // catches IOException below
-			String outputString = new String(latitude + "\n" + longitude + "\n"
-					+ type + "\n" + description + "\n" + imageUri);
-
-			// ##### Write a file to the disk #####
-			/*
-			 * We have to use the openFileOutput()-method the ActivityContext
-			 * provides, to protect your file from others and This is done for
-			 * security-reasons. We chose MODE_WORLD_READABLE, because we have
-			 * nothing to hide in our file
-			 */
-			Log.i(TAG, "asdf");
-			String filePath = this.getFilesDir().getPath().toString()
-					+ "/incidents.txt";
-			File file = new File(filePath);
-			if (!file.exists()) {
-				file.createNewFile();
-			}
-			FileWriter filewriter = new FileWriter(file);
-
-			BufferedWriter wr = new BufferedWriter(filewriter);
-			// Write the string to the file
-			wr.write(outputString);
-			/*
-			 * ensure that everything is really written out and close
-			 */
-			wr.flush();
-			wr.close();
-			Log.i("report", "write :" + outputString);
-			Toast.makeText(ReportMap.this,
-					"Reported point :" + latitude + " " + longitude,
-					Toast.LENGTH_SHORT).show();
-			// ##### Read the file back in #####
-
-			/*
-			 * We have to use the openFileInput()-method the ActivityContext
-			 * provides. Again for security reasons with openFileInput(...)
-			 */
-			FileInputStream fIn = openFileInput("incidents.txt");
-			InputStreamReader isr = new InputStreamReader(fIn);
-			/*
-			 * Prepare a char-Array that will hold the chars we read back in.
-			 */
-			char[] inputBuffer = new char[outputString.length()];
-			// Fill the Buffer with data from the file
-			isr.read(inputBuffer);
-			// Transform the chars to a String
-			String readString = new String(inputBuffer);
-
-			// Check if we read back the same chars that we had written out
-			boolean isTheSame = outputString.equals(readString);
-
-			// WOHOO lets Celebrate =)
-			Log.i("File Reading stuff", "success = " + isTheSame);
-			finish();
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
 	}
 
 	public class SendReportTask extends AsyncTask<Caution, String, Void> {

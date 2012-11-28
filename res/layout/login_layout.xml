@@ -35,6 +35,7 @@
             android:layout_margin="10sp"
             android:hint="@string/username_edt_hint"
             android:padding="5sp"
+            android:singleLine="true"
             android:textSize="18sp" />
 
         <EditText
@@ -45,6 +46,7 @@
             android:hint="@string/password_edt_hint"
             android:inputType="textPassword"
             android:padding="5sp"
+            android:singleLine="true"
             android:textSize="18sp" />
 
         <LinearLayout

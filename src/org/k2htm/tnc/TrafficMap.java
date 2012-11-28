@@ -60,12 +60,14 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	private boolean refreshing = false;
 	private TextView tvUsername;
 	private TextView tvType;
+	private TextView tvUpVote, tvDownVote;
 	private TrafficNetworkClient mApplication;
 	private TextView tvDes, tvTime;
 	private MenuItem refreshMenuItem;
 	private ImageView imvBig, imvSmall;
 	private LinearLayout llDetail, llPopupImage;
 	private ListView lvComment;
+	private Report curReport;
 	public static final int REQUEST_CODE = 100;
 	public static final String TAG = "Traffic Map";
 	public static final String LONG = "longitude";
@@ -102,6 +104,8 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		tvType = (TextView) findViewById(R.id.tvIncType);
 		tvUsername = (TextView) findViewById(R.id.tvUsername);
 		tvTime = (TextView) findViewById(R.id.tvTime);
+		tvUpVote = (TextView) findViewById(R.id.tvUpVote);
+		tvDownVote = (TextView) findViewById(R.id.tvDownVote);
 		// hide view
 		llDetail.setVisibility(View.GONE);
 		imvBig.setVisibility(View.GONE);
@@ -147,7 +151,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		llDetail.setVisibility(View.VISIBLE);
 		Log.i(TAG, "Show Detail");
 
-		Report curReport = overlayItem.getReport();
+		curReport = overlayItem.getReport();
 		Log.i(TAG, "curReport: " + curReport.toString());
 
 		// tvType.setText(curReport.getType()+"");
@@ -169,13 +173,13 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		tvType.setText(typeStr);
 		tvDes.setText(curReport.getDescription());
 		// Show time
-		String dateFormat  ="hh:mm dd/MM/yyyy ";
+		String dateFormat = "hh:mm dd/MM/yyyy ";
 		DateFormat formatter = new SimpleDateFormat(dateFormat);
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(curReport.getTime());
 		tvTime.setText(formatter.format(calendar.getTime()) + "");
 		Log.i(TAG, "report descreiption" + curReport.getDescription());
-		//tvUsername.setText(curReport.getUsername()); 
+		// tvUsername.setText(curReport.getUsername());
 		GeoPoint curPoint = new GeoPoint(curReport.getLat(), curReport.getLng());
 		if (curPoint != null) {
 			mapController.animateTo(curPoint);
@@ -187,43 +191,6 @@ public class TrafficMap extends MapActivity implements LocationListener {
 
 	}
 
-	private class ShowDetailsWithComment extends AsyncTask<Void, Void, Void> {
-		CommentItemAdapter adapter;
-
-		@Override
-		protected void onPreExecute() {
-			// TODO Auto-generated method stub
-			super.onPreExecute();
-			setProgressBarIndeterminateVisibility(true);
-		}
-
-		@Override
-		protected Void doInBackground(Void... params) {
-			// THieu ID
-			int cautionID = 1;
-			CommentGetter commentGetter = new CommentGetter(cautionID,
-					new HoaHelper(TrafficNetworkClient.ADDRESS));
-
-			try {
-				adapter = new CommentItemAdapter(mApplication,
-						commentGetter.getComments(cautionID));
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			// TODO Auto-generated method stub
-			super.onPostExecute(result);
-			lvComment.setAdapter(adapter);
-
-			setProgressBarIndeterminateVisibility(true);
-		}
-	}
 
 	public void hideDetail(View view) {
 		llDetail.setVisibility(View.GONE);
@@ -542,6 +509,14 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	}
 
 	private class GetImageTask extends AsyncTask<String, String, Boolean> {
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+			Toast.makeText(TrafficMap.this, "Loading Image", Toast.LENGTH_SHORT)
+					.show();
+			setProgressBarIndeterminateVisibility(true);
+		}
 
 		@Override
 		protected Boolean doInBackground(String... url) {
@@ -576,14 +551,16 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		protected void onPostExecute(Boolean result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
+			setProgressBarVisibility(false);
 			if (result) {
 
 				imvSmall.setImageBitmap(tmpBitmapImage);
 				imvBig.setImageBitmap(tmpBitmapImage);
-
+setProgressBarIndeterminateVisibility(false);
 			} else {
 				Toast.makeText(TrafficMap.this, "Cannot download Image",
 						Toast.LENGTH_SHORT).show();
+				setProgressBarIndeterminateVisibility(false);
 			}
 		}
 
@@ -601,5 +578,40 @@ public class TrafficMap extends MapActivity implements LocationListener {
 
 	public void showImage(View v) {
 		imvBig.setVisibility(View.VISIBLE);
+	}
+
+	public void toDetailAct(View v) {
+		Intent oIntent = new Intent(TrafficMap.this,
+				IncidentDetailActivity.class);
+		Bundle mBundle = new Bundle();
+		// User
+		mBundle.putString(IncidentDetailActivity.USERNAME, tvUsername.getText()
+				.toString());
+		// Type
+		mBundle.putString(IncidentDetailActivity.TYPE, tvType.getText()
+				.toString());
+		// Time
+		mBundle.putString(IncidentDetailActivity.TIME, tvTime.getText()
+				.toString());
+		// Upvote
+		mBundle.putString(IncidentDetailActivity.UPVOTE, tvUpVote.getText()
+				.toString());
+		// down vote
+		mBundle.putString(IncidentDetailActivity.DOWNVOTE, tvDownVote.getText()
+				.toString());
+		// ImageUrl
+		Log.i(TAG, "image : " + curReport.getImage());
+		mBundle.putString(IncidentDetailActivity.IMAGE, curReport.getImage());
+		// Description
+		if (!tvDes.getText().equals("")) {
+			mBundle.putString(IncidentDetailActivity.DESCRIPTION, tvDes
+					.getText().toString());
+			Log.i(TAG, "put String Des:" + tvDes.getText());
+		}
+		// ID
+		mBundle.putInt(IncidentDetailActivity.ID, curReport.getCautionID());
+		oIntent.putExtras(mBundle);
+		startActivity(oIntent);
+
 	}
 }
