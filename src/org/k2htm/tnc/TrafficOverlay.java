@@ -22,12 +22,14 @@ public class TrafficOverlay extends BalloonItemizedOverlay<IncidentOverlayItem> 
 	private ArrayList<IncidentOverlayItem> incidents = new ArrayList<IncidentOverlayItem>();
 	private Location currentLocation;
 	private TrafficMap map;
-	public TrafficOverlay(Drawable defaultMarker, MapView mapView,TrafficMap map) {
+
+	public TrafficOverlay(Drawable defaultMarker, MapView mapView,
+			TrafficMap map) {
 		super(defaultMarker, mapView);
 		// TODO Auto-generated constructor stub
 		boundCenterBottom(defaultMarker);
 		mContext = mapView.getContext();
-		this.map=map;
+		this.map = map;
 		populate();
 	}
 
@@ -85,12 +87,12 @@ public class TrafficOverlay extends BalloonItemizedOverlay<IncidentOverlayItem> 
 		// mContext.startActivity(detailActIntent);
 		// }
 		Log.i(TAG, "item tapped :" + item.toString());
-		Log.i(TAG, "OverlayItem getTitle :" +item.getTitle());
+		Log.i(TAG, "OverlayItem getTitle :" + item.getTitle());
 		String incidentTitle = item.getTitle();
 		if (!incidentTitle.equals("You are here!")) {
 			// String incidentDes = incidents.get(index).getSnippet();
 			// GeoPoint incidentPoint = incidents.get(index).getPoint();
-			//Log.i(TAG,"Tap tap tap:"+index);
+			// Log.i(TAG,"Tap tap tap:"+index);
 			try {
 				map.showDetail(item);
 			} catch (Exception e) {
@@ -101,13 +103,18 @@ public class TrafficOverlay extends BalloonItemizedOverlay<IncidentOverlayItem> 
 		return true;
 	}
 
+@Override
+public boolean onTap(GeoPoint arg0, MapView arg1) {
+	// TODO Auto-generated method stub
+	super.onTap(arg0, arg1);
+	map.hideDetail();
+	return false;
+}
 	public static Location convertGpToLoc(GeoPoint gp) {
 		Location convertedLocation = new Location("");
 		convertedLocation.setLatitude(gp.getLatitudeE6() / 1e6);
 		convertedLocation.setLongitude(gp.getLongitudeE6() / 1e6);
 		return convertedLocation;
 	}
-
-
 
 }

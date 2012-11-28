@@ -191,7 +191,6 @@ public class TrafficMap extends MapActivity implements LocationListener {
 
 	}
 
-
 	public void hideDetail(View view) {
 		llDetail.setVisibility(View.GONE);
 	}
@@ -556,7 +555,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 
 				imvSmall.setImageBitmap(tmpBitmapImage);
 				imvBig.setImageBitmap(tmpBitmapImage);
-setProgressBarIndeterminateVisibility(false);
+				setProgressBarIndeterminateVisibility(false);
 			} else {
 				Toast.makeText(TrafficMap.this, "Cannot download Image",
 						Toast.LENGTH_SHORT).show();
@@ -566,10 +565,14 @@ setProgressBarIndeterminateVisibility(false);
 
 	}
 
-	public void showComment(View v) {
-		// Get comment THieu ID
-		ShowDetailsWithComment comment = new ShowDetailsWithComment();
-		comment.execute();
+	// public void showComment(View v) {
+	// // Get comment THieu ID
+	// ShowDetailsWithComment comment = new ShowDetailsWithComment();
+	// comment.execute();
+	// }
+
+	public void hideDetail() {
+		llDetail.setVisibility(View.GONE);
 	}
 
 	public void hideImage(View v) {
