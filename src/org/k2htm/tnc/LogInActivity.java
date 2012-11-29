@@ -1,5 +1,12 @@
 package org.k2htm.tnc;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -16,10 +23,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.android.AsyncFacebookRunner;
+import com.facebook.android.AsyncFacebookRunner.RequestListener;
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
+import com.facebook.android.Util;
 
 import edu.k2htm.clientHelper.DuplicateUserException;
 import edu.k2htm.clientHelper.HoaHelper;
@@ -58,20 +67,78 @@ public class LogInActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				facebook.authorize(LogInActivity.this, new DialogListener() {
-					@Override
 					public void onComplete(Bundle values) {
+
+Log.i(TAG,"onComplete");
+						// The user has logged in, so now you can query and
+						// use their Facebook info
+						mAsyncRunner.request("me", new RequestListener() {
+
+							@Override
+							public void onComplete(String response, Object state) {
+								// TODO Auto-generated method stub
+								Log.i(TAG,"onComplete");
+								try {		
+									Log.i(TAG, response);
+									//parse JSON
+									 JSONObject jsonObj = new JSONObject(response);
+									 Log.i(TAG, jsonObj.getString("username"));
+								} catch (FacebookError e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								} catch (JSONException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								} 
+							}
+
+							@Override
+							public void onIOException(IOException e,
+									Object state) {
+								// TODO Auto-generated method stub
+
+							}
+
+							@Override
+							public void onFileNotFoundException(
+									FileNotFoundException e, Object state) {
+								// TODO Auto-generated method stub
+
+							}
+
+							@Override
+							public void onMalformedURLException(
+									MalformedURLException e, Object state) {
+								// TODO Auto-generated method stub
+
+							}
+
+							@Override
+							public void onFacebookError(FacebookError e,
+									Object state) {
+								// TODO Auto-generated method stub
+
+							}
+						});
+
 					}
 
-					@Override
 					public void onFacebookError(FacebookError error) {
+						Toast.makeText(LogInActivity.this,
+								"Something went wrong. Please try again.",
+								Toast.LENGTH_LONG).show();
 					}
 
-					@Override
-					public void onError(DialogError e) {
+					public void onError(DialogError error) {
+						Toast.makeText(LogInActivity.this,
+								"Something went wrong. Please try again.",
+								Toast.LENGTH_LONG).show();
 					}
 
-					@Override
 					public void onCancel() {
+						Toast.makeText(LogInActivity.this,
+								"Something went wrong. Please try again.",
+								Toast.LENGTH_LONG).show();
 					}
 				});
 
@@ -236,7 +303,7 @@ public class LogInActivity extends Activity {
 			return false;
 		}
 
-		@Override  
+		@Override
 		protected void onProgressUpdate(String... values) {
 			// TODO Auto-generated method stub
 			super.onProgressUpdate(values);
@@ -254,9 +321,9 @@ public class LogInActivity extends Activity {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		facebook.authorizeCallback(requestCode, resultCode, data);
-		Log.i(TAG, "requestCode: " + requestCode + ", resultCode: "
-				+ resultCode + ", data:" + data);
-		// new LoginAsFBTask().execute(params);
+		 facebook.authorizeCallback(requestCode, resultCode, data);
+		// Bundle mBundle = data.getExtras();
+Log.i(TAG,"onActivityResult");
+		// new LoginAsFBTask().execute(facebook.request(me));
 	}
 }
