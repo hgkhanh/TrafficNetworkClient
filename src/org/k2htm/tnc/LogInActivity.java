@@ -7,13 +7,20 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.facebook.android.AsyncFacebookRunner;
+import com.facebook.android.DialogError;
+import com.facebook.android.Facebook;
+import com.facebook.android.Facebook.DialogListener;
+import com.facebook.android.FacebookError;
+
 import edu.k2htm.clientHelper.DuplicateUserException;
 import edu.k2htm.clientHelper.HoaHelper;
 import edu.k2htm.datahelper.User;
@@ -21,11 +28,13 @@ import edu.k2htm.datahelper.User;
 public class LogInActivity extends Activity {
 	private EditText edtUsr, edtPass;
 	private TextView btnReg;
-	private Button btnConfirm,btnFbLogin;
+	private Button btnConfirm, btnFbLogin;
 	private TrafficNetworkClient mApplication;
 	public static final String TAG = "Login Activity";
-
 	private boolean check_usr_ok = false;
+	// facebook
+	Facebook facebook = new Facebook("294323060688115");
+	AsyncFacebookRunner mAsyncRunner = new AsyncFacebookRunner(facebook);
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +52,31 @@ public class LogInActivity extends Activity {
 		btnFbLogin = (Button) findViewById(R.id.btnFacebook);
 
 		// on click listener
-		Log.i(TAG, "asdf");
-		//btnFbLogin
+		// btnFbLogin
+		btnFbLogin.setOnClickListener(new OnClickListener() {
 
+			@Override
+			public void onClick(View v) {
+				facebook.authorize(LogInActivity.this, new DialogListener() {
+					@Override
+					public void onComplete(Bundle values) {
+					}
+
+					@Override
+					public void onFacebookError(FacebookError error) {
+					}
+
+					@Override
+					public void onError(DialogError e) {
+					}
+
+					@Override
+					public void onCancel() {
+					}
+				});
+
+			}
+		});
 		// btnReg
 		btnReg.setOnTouchListener(new OnTouchListener() {
 
@@ -189,21 +220,23 @@ public class LogInActivity extends Activity {
 			setProgressBarIndeterminateVisibility(false);
 		}
 	}
+
 	private class LoginAsFBTask extends AsyncTask<String, String, Boolean> {
 		@Override
 		protected Boolean doInBackground(String... params) {
-			User mUser = new User(params[0]	, genPass() , new HoaHelper(TrafficNetworkClient.ADDRESS));
+			User mUser = new User(params[0], genPass(), new HoaHelper(
+					TrafficNetworkClient.ADDRESS));
 			try {
 				mUser.register();
-			}catch(DuplicateUserException ex){
+			} catch (DuplicateUserException ex) {
 				return true;
-			}
-			catch (Exception e) {
-				publishProgress(getText(R.string.network_error)+"");
+			} catch (Exception e) {
+				publishProgress(getText(R.string.network_error) + "");
 			}
 			return false;
 		}
-		@Override
+
+		@Override  
 		protected void onProgressUpdate(String... values) {
 			// TODO Auto-generated method stub
 			super.onProgressUpdate(values);
@@ -211,10 +244,19 @@ public class LogInActivity extends Activity {
 					Toast.LENGTH_SHORT).show();
 		}
 
-		
 	}
-	private String genPass(){
+
+	private String genPass() {
 		return "shgs29083t723ius";
-		
+
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		facebook.authorizeCallback(requestCode, resultCode, data);
+		Log.i(TAG, "requestCode: " + requestCode + ", resultCode: "
+				+ resultCode + ", data:" + data);
+		// new LoginAsFBTask().execute(params);
 	}
 }
