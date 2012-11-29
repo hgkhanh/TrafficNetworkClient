@@ -23,7 +23,7 @@
         android:id="@+id/infoLinearLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="#97000000"
+        android:background="#86111111"
         android:clickable="true"
         android:onClick="centerToCurrentLocation"
         android:orientation="horizontal"
@@ -92,7 +92,6 @@
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:layout_weight="2"
-            android:background="@android:color/darker_gray"
             android:text="Confirm" />
     </LinearLayout>
 
@@ -139,7 +138,7 @@
                 android:id="@+id/imbImage"
                 android:adjustViewBounds="true"
                 android:scaleType="centerInside"
-                android:src="@drawable/btn_camera"
+                android:src="@drawable/btn_camera_bg"
                 android:onClick="callImagePicker"
                 android:background="@android:color/transparent" />
         </LinearLayout>

@@ -108,12 +108,11 @@ public class ReportMap extends MapActivity {
 					int lng = Integer.parseInt(tvLong.getText().toString());
 					File image;
 					if (imageUriStr.equals("")) {
-						image = null;
-					} else {
+						imageUriStr = getText(R.drawable.default_image).toString();
+					} 
 
 						image = new File(imageUriStr);
 
-					}
 					String comment = edtDes.getText().toString();
 
 					// new Caution object
@@ -381,8 +380,8 @@ public class ReportMap extends MapActivity {
 	private void setCurLocation() {
 		Intent iIntent = getIntent();
 		Bundle iBundle = iIntent.getExtras();
-		currentPoint = new GeoPoint(iBundle.getInt(TrafficMap.LAT),
-				iBundle.getInt(TrafficMap.LONG));
+		currentPoint = new GeoPoint(iBundle.getInt(TrafficMap.LAT)+10,
+				iBundle.getInt(TrafficMap.LONG)+10);
 		Log.i("report", "lat: " + iBundle.getInt(TrafficMap.LAT) + "\nlong:"
 				+ iBundle.getInt(TrafficMap.LONG));
 	}

@@ -39,6 +39,8 @@ public class ReportGetter {
 	public static final String IMAGE_TAG = "image";
 	public static final String TAG = "ReportGetter";
 	public static final String ID_TAG = "id";
+	public static final String UPVOTE_TAG = "upvote";
+	public static final String DOWNVOTE_TAG = "downvote";
 
 	public ReportGetter(ReportGetHelper reportGetHelper) {
 		// TODO Auto-generated constructor stub
@@ -61,7 +63,6 @@ public class ReportGetter {
 
 	// end test///////////
 	public static ArrayList<Report> parseReportXml(String xmlStr) {
-		Log.d(TAG,"XML:"+xmlStr);
 		ArrayList<Report> inputRepList = new ArrayList<Report>();
 		try {
 			// xmlStr need to be convert to avoid premature end of file
@@ -79,7 +80,11 @@ public class ReportGetter {
 			// new InputStream from xmlStrConverted
 			is = new ByteArrayInputStream(xmlStrConverted.getBytes());
 			// pasrse (inputStream)XMLString
-			String username = "", image = "", des = "", lat = "", lng = "", time = "", type = "",id="";
+			String username = "", image = "", des = "", lat = "", lng = "", time = "", type = "", id = "";
+
+			// TODO lamf cais nayf
+			int up = 0;
+			int down = 0;
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
 					.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -100,13 +105,15 @@ public class ReportGetter {
 					des = getTagValue(DESCRIPTION_TAG, eElement);
 					type = getTagValue(TYPE_TAG, eElement);
 					image = getTagValue(IMAGE_TAG, eElement);
-					id = getTagValue(ID_TAG,eElement);
-
+					id = getTagValue(ID_TAG, eElement);
+					up = Integer.parseInt(getTagValue(UPVOTE_TAG, eElement)) ;
+					down = Integer.parseInt(getTagValue(DOWNVOTE_TAG, eElement));
 				}
 
-				Report report = new Report(Integer.parseInt(id),username, Long.parseLong(time),
-						Integer.parseInt(lat), Integer.parseInt(lng), des,
-						Short.parseShort(type), image);
+				Report report = new Report(Integer.parseInt(id), username,
+						Long.parseLong(time), Integer.parseInt(lat),
+						Integer.parseInt(lng), des, Short.parseShort(type),
+						image, up, down);
 				inputRepList.add(report);
 			}
 
@@ -118,18 +125,18 @@ public class ReportGetter {
 	}
 
 	public ArrayList<Report> getReports(int periodMin) throws Exception {
-		Log.d(TAG,"getReports:"+periodMin);
+		Log.d(TAG, "getReports:" + periodMin);
 		this.reportGetHelper.init();
 		reports = getReportGetHelper().getReport(periodMin);
 		this.reportGetHelper.close();
-		Log.d(TAG,"Get Result:\n"+toString());
+		Log.d(TAG, "Get Result:\n" + toString());
 		return reports;
 	}
 
 	public String getReportAsXML(int periodMin) throws Exception {
-		//COMENT OUT THIS FOR TEST //
+		// COMENT OUT THIS FOR TEST //
 		this.getReports(periodMin);
-		
+
 		String outputXmlString = "";
 		try {
 			// create doc object
@@ -200,8 +207,18 @@ public class ReportGetter {
 				report.appendChild(image);
 				// id elements
 				Element id = doc.createElement(ID_TAG);
-				id.appendChild(doc.createTextNode(curReport.getCautionID()+""));
+				id.appendChild(doc.createTextNode(curReport.getCautionID() + ""));
 				report.appendChild(id);
+				// upvote elements
+				Element upvote = doc.createElement(UPVOTE_TAG);
+				upvote.appendChild(doc.createTextNode(curReport.getVoteUp()
+						+ ""));
+				report.appendChild(upvote);
+				// downvote elements
+				Element downvote = doc.createElement(DOWNVOTE_TAG);
+				downvote.appendChild(doc.createTextNode(curReport.getVoteUp()
+						+ ""));
+				report.appendChild(downvote);
 				// // write the content into xml file
 				// TransformerFactory transformerFactory = TransformerFactory
 				// .newInstance();
@@ -228,7 +245,6 @@ public class ReportGetter {
 		} catch (TransformerException tfe) {
 			tfe.printStackTrace();
 		}
-		Log.d(TAG,"xml result:"+outputXmlString);
 		return outputXmlString;
 	}
 
@@ -251,14 +267,15 @@ public class ReportGetter {
 			return null;
 		}
 	}
+
 	@Override
 	public String toString() {
-		StringBuffer buffer=new StringBuffer();
-		buffer.append("Report:"+this.reports.size()+"\n");
-		for(int i=0;i<reports.size();i++){
-			buffer.append(reports.get(i).toString()+"\n");
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("Report:" + this.reports.size() + "\n");
+		for (int i = 0; i < reports.size(); i++) {
+			buffer.append(reports.get(i).toString() + "\n");
 		}
-		
+
 		return buffer.toString();
 	}
 }

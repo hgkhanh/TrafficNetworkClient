@@ -199,7 +199,7 @@ public class HoaHelper implements CautionHelper, CheckUserHelper,
 		HttpGet httpget = new HttpGet(uri);
 		scanner4 = new Scanner(executeRequest.execute(httpget));
 		if (scanner4.next().equals(DataHelper.STATUS_FAIL))
-			throw new Exception();
+			throw new Exception("Already Vote!!");
 	}
 
 	@Override

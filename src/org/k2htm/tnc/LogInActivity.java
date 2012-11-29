@@ -14,13 +14,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import edu.k2htm.clientHelper.DuplicateUserException;
 import edu.k2htm.clientHelper.HoaHelper;
 import edu.k2htm.datahelper.User;
 
 public class LogInActivity extends Activity {
 	private EditText edtUsr, edtPass;
 	private TextView btnReg;
-	private Button btnConfirm;
+	private Button btnConfirm,btnFbLogin;
 	private TrafficNetworkClient mApplication;
 	public static final String TAG = "Login Activity";
 
@@ -39,10 +40,13 @@ public class LogInActivity extends Activity {
 		edtPass = (EditText) findViewById(R.id.edtPassword);
 		btnConfirm = (Button) findViewById(R.id.btnConfirm);
 		btnReg = (TextView) findViewById(R.id.btnReg);
+		btnFbLogin = (Button) findViewById(R.id.btnFacebook);
 
 		// on click listener
 		Log.i(TAG, "asdf");
-		// tvReg
+		//btnFbLogin
+
+		// btnReg
 		btnReg.setOnTouchListener(new OnTouchListener() {
 
 			@Override
@@ -132,9 +136,6 @@ public class LogInActivity extends Activity {
 
 				Log.i(TAG, "doinbackground result=checkuser()");
 				result = mUser.checkUser();
-				// TEST
-				result = true;
-				// END TEST
 
 				Log.i(TAG, "result=checkuser() ook\n result = " + result);
 			} catch (Exception e) {
@@ -187,5 +188,33 @@ public class LogInActivity extends Activity {
 
 			setProgressBarIndeterminateVisibility(false);
 		}
+	}
+	private class LoginAsFBTask extends AsyncTask<String, String, Boolean> {
+		@Override
+		protected Boolean doInBackground(String... params) {
+			User mUser = new User(params[0]	, genPass() , new HoaHelper(TrafficNetworkClient.ADDRESS));
+			try {
+				mUser.register();
+			}catch(DuplicateUserException ex){
+				return true;
+			}
+			catch (Exception e) {
+				publishProgress(getText(R.string.network_error)+"");
+			}
+			return false;
+		}
+		@Override
+		protected void onProgressUpdate(String... values) {
+			// TODO Auto-generated method stub
+			super.onProgressUpdate(values);
+			Toast.makeText(LogInActivity.this, "Network Error",
+					Toast.LENGTH_SHORT).show();
+		}
+
+		
+	}
+	private String genPass(){
+		return "shgs29083t723ius";
+		
 	}
 }

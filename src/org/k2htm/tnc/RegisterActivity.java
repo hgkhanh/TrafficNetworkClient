@@ -98,7 +98,7 @@ public class RegisterActivity extends Activity {
 		protected void onProgressUpdate(String... values) {
 			// TODO Auto-generated method stub
 			super.onProgressUpdate(values);
-
+//IF FACEBOOK  -> REG ACC FACEBOOK
 			Toast.makeText(RegisterActivity.this, values[0], Toast.LENGTH_SHORT)
 					.show();
 		}

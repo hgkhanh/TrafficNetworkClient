@@ -39,9 +39,7 @@ public class VoteSetGetter {
 		this.helper.close();
 		return tmp;
 	}
-	public static void main(String[] args) {
-		System.out.println(getCreateTableQuery());
-	}
+	
 	public VoteHelper getHelper() {
 		return helper;
 	}

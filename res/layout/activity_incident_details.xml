@@ -97,7 +97,7 @@
                             android:clickable="true"
                             android:onClick="voteUp"
                             android:scaleType="centerInside"
-                            android:src="@drawable/icon_good" />
+                            android:src="@drawable/btn_upvote_bg" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -126,8 +126,14 @@
                             android:clickable="true"
                             android:onClick="voteDown"
                             android:scaleType="centerInside"
-                            android:src="@drawable/icon_bad" />
+                            android:src="@drawable/btn_downvote_bg" />
                     </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btnSendComment"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Share" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -135,11 +141,11 @@
                 android:id="@+id/tvDescription"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="4"
+                android:layout_weight="3"
                 android:gravity="center_vertical"
                 android:paddingLeft="10sp"
                 android:text="Description Go Here"
-                android:textSize="30sp" />
+                android:textSize="25sp" />
 
             <ImageView
                 android:id="@+id/imvSmall"
@@ -148,7 +154,7 @@
                 android:layout_weight="3"
                 android:adjustViewBounds="true"
                 android:clickable="true"
-                android:onClick="showBigImage"
+                android:onClick="showImage"
                 android:scaleType="centerInside"
                 android:src="@android:drawable/ic_menu_gallery" />
         </LinearLayout>
@@ -156,7 +162,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginTop="20sp"
             android:layout_weight="2"
+            android:background="@drawable/box_shadows"
             android:orientation="vertical" >
 
             <ListView
@@ -183,8 +191,9 @@
 
                 <Button
                     android:id="@+id/btnSendComment"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_margin="20sp"
                     android:layout_weight="3"
                     android:text="Send" />
             </LinearLayout>
@@ -193,13 +202,15 @@
 
     <ImageView
         android:id="@+id/imvBig"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center"
         android:adjustViewBounds="true"
         android:background="@drawable/box_shadows_small"
         android:clickable="true"
-        android:onClick="hideBigImage"
-        android:scaleType="centerInside"
-         />
+        android:onClick="hideImage"
+        android:padding="20sp"
+        android:src="@drawable/loading_image"
+        android:visibility="gone" />
 
 </RelativeLayout>

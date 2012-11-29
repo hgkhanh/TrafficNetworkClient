@@ -15,9 +15,14 @@ public class Report {
 	private CautionHelper cautionHelper;
 	private short type;
 	private int cautionID;
-
+	
+	//
+	private int voteUp;
+	private int voteDown;
+	
+	//
 	public Report(int cautionID,String username, long time, int lat, int lng,
-			String des, short type, String image) {
+			String des, short type, String image,int up,int down) {
 		setUsername(username);
 		setTime(time);
 		setLat(lat);
@@ -26,6 +31,8 @@ public class Report {
 		setType(type);
 		setImage(image);
 		setCautionID(cautionID);
+		this.setVoteUp(up);
+		this.setVoteDown(down);
 	}
 
 	public Report() {
@@ -113,5 +120,21 @@ public class Report {
 	}
 	public void setCautionID(int cautionID) {
 		this.cautionID = cautionID;
+	}
+
+	public int getVoteUp() {
+		return voteUp;
+	}
+
+	public void setVoteUp(int voteUp) {
+		this.voteUp = voteUp;
+	}
+
+	public int getVoteDown() {
+		return voteDown;
+	}
+
+	public void setVoteDown(int voteDown) {
+		this.voteDown = voteDown;
 	}
 }

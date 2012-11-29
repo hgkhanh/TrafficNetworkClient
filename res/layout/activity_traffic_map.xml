@@ -7,14 +7,17 @@
         android:id="@+id/mapView"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
         android:apiKey="0pO5vO6nJAszQbx_D4JwG6up9P9QIU_9F5BLW_g"
-        android:clickable="true" />
+        android:clickable="true" >
+    </com.google.android.maps.MapView>
 
     <LinearLayout
         android:id="@+id/infoLinearLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="#97000000"
+        android:background="#86111111"
         android:clickable="true"
         android:onClick="centerToCurrentLocation"
         android:orientation="horizontal"
@@ -84,7 +87,6 @@
                 android:id="@+id/btnReport"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@android:color/darker_gray"
                 android:padding="5dp"
                 android:text="Report" />
         </LinearLayout>
@@ -100,7 +102,8 @@
         android:paddingBottom="30dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:paddingTop="10dp" >
+        android:paddingTop="10dp"
+        android:visibility="visible" >
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -207,13 +210,15 @@
                         android:textSize="25sp" />
 
                     <ImageView
-                        android:id="@+id/imbImage"
+                        android:id="@+id/imbUpVote"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:adjustViewBounds="true"
+                        android:clickable="true"
+                        android:onClick="voteUp"
                         android:scaleType="centerInside"
-                        android:src="@drawable/icon_good" />
+                        android:src="@drawable/btn_upvote_bg" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -233,25 +238,27 @@
                         android:textSize="25sp" />
 
                     <ImageView
-                        android:id="@+id/imbImage"
+                        android:id="@+id/imbDownVote"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_weight="1"
                         android:adjustViewBounds="true"
+                        android:clickable="true"
+                        android:onClick="voteDown"
                         android:scaleType="centerInside"
-                        android:src="@drawable/icon_bad" />
+                        android:src="@drawable/btn_downvote_bg"/>
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/llComment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" 
-            android:id="@+id/llComment"
             android:clickable="true"
-            android:onClick="toDetailAct">
+            android:onClick="toDetailAct"
+            android:orientation="horizontal" >
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -280,7 +287,7 @@
                     android:clickable="true"
                     android:onClick="showImage"
                     android:scaleType="centerInside"
-                    android:src="@android:drawable/ic_menu_gallery" />
+                    android:src="@drawable/loading_image" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
@@ -295,7 +302,7 @@
         android:clickable="true"
         android:onClick="hideImage"
         android:padding="20sp"
-        android:src="@android:drawable/ic_menu_gallery"
+        android:src="@drawable/loading_image"
         android:visibility="gone" />
 
 </RelativeLayout>

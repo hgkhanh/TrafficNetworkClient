@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.PublicKey;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ import edu.k2htm.clientHelper.HoaHelper;
 import edu.k2htm.datahelper.CommentGetter;
 import edu.k2htm.datahelper.Report;
 import edu.k2htm.datahelper.ReportGetter;
+import edu.k2htm.datahelper.VoteSetGetter;
 
 public class TrafficMap extends MapActivity implements LocationListener {
 	private static MapController mapController;
@@ -139,7 +141,6 @@ public class TrafficMap extends MapActivity implements LocationListener {
 				startActivityForResult(oIntent, REQUEST_CODE);
 			}
 		});
-
 	}
 
 	public void centerToCurrentLocation(View view) {
@@ -149,12 +150,14 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	public void showDetail(IncidentOverlayItem overlayItem) throws Exception {
 
 		llDetail.setVisibility(View.VISIBLE);
+		imvSmall.setImageResource(R.drawable.loading_image);
+		imvBig.setImageResource(R.drawable.loading_image);
 		Log.i(TAG, "Show Detail");
 
 		curReport = overlayItem.getReport();
-		Log.i(TAG, "curReport: " + curReport.toString());
 
 		// tvType.setText(curReport.getType()+"");
+		// show Type
 		String typeStr = "";
 		switch (curReport.getType()) {
 		case TrafficMap.TRAFFIC_JAM_CODE:
@@ -171,15 +174,20 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		}
 
 		tvType.setText(typeStr);
+		// show Des
 		tvDes.setText(curReport.getDescription());
+		// show vote
+		tvUpVote.setText(curReport.getVoteUp() + "");
+		tvUpVote.setText(curReport.getVoteDown() + "");
 		// Show time
 		String dateFormat = "hh:mm dd/MM/yyyy ";
 		DateFormat formatter = new SimpleDateFormat(dateFormat);
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(curReport.getTime());
 		tvTime.setText(formatter.format(calendar.getTime()) + "");
-		Log.i(TAG, "report descreiption" + curReport.getDescription());
-		// tvUsername.setText(curReport.getUsername());
+		// set usrname
+		tvUsername.setText(curReport.getUsername());
+		// center map to incident position
 		GeoPoint curPoint = new GeoPoint(curReport.getLat(), curReport.getLng());
 		if (curPoint != null) {
 			mapController.animateTo(curPoint);
@@ -303,7 +311,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			// Log.i(TAG, "tmp_type:" + tmp_type);
 			// des_string = curReport.getDescription();
 			// Log.i(TAG, "tmp_des:" + des_string);
-			// imageUri = curReport.getImage();
+			// imageUri = curReport.getImage();  
 			// Log.i(TAG, "image uri:" + imageUri);
 			// username = curReport.getUsername();
 			// Log.i(TAG, "username:" + username);
@@ -342,6 +350,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			}
 		}
 
+		// add overlay (check setting to see which overlay to show)
 		overlays.add(jamPos);
 		overlays.add(accidentPos);
 		overlays.add(blockedPos);
@@ -356,7 +365,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_traffic_map, menu);
 
-		return true;
+		return true;  
 	}
 
 	@Override
@@ -364,8 +373,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		// TODO Auto-generated method stub
 		switch (item.getItemId()) {
 		case R.id.map_refresh:
-			GetReportTask mGetReportTask = new GetReportTask();
-			mGetReportTask.execute();
+			new GetReportTask().execute();
 
 			break;
 		case R.id.min10:
@@ -373,41 +381,50 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			Toast.makeText(
 					TrafficMap.this,
 					getString(R.string.menu_filter_success_toast) + ": "
-							+ item.getTitle(), Toast.LENGTH_SHORT).show();
+							+ mApplication.getTimeFilter(), Toast.LENGTH_SHORT)
+					.show();
+			new GetReportTask().execute();
 			break;
 		case R.id.min30:
 			mApplication.setTimeFilter(30);
 			Toast.makeText(
 					TrafficMap.this,
 					getString(R.string.menu_filter_success_toast) + ": "
-							+ item.getTitle(), Toast.LENGTH_SHORT).show();
+							+ mApplication.getTimeFilter(), Toast.LENGTH_SHORT)
+					.show();
+			new GetReportTask().execute();
 			break;
 		case R.id.hour1:
 			mApplication.setTimeFilter(60);
 			Toast.makeText(
 					TrafficMap.this,
 					getString(R.string.menu_filter_success_toast) + ": "
-							+ item.getTitle(), Toast.LENGTH_SHORT).show();
+							+ mApplication.getTimeFilter(), Toast.LENGTH_SHORT)
+					.show();
+			new GetReportTask().execute();
 			break;
 		case R.id.hour3:
 			mApplication.setTimeFilter(180);
 			Toast.makeText(
 					TrafficMap.this,
 					getString(R.string.menu_filter_success_toast) + ": "
-							+ item.getTitle(), Toast.LENGTH_SHORT).show();
+							+ mApplication.getTimeFilter(), Toast.LENGTH_SHORT)
+					.show();
+			new GetReportTask().execute();
 			break;
 		case R.id.hour6:
 			mApplication.setTimeFilter(360);
 			Toast.makeText(
 					TrafficMap.this,
 					getString(R.string.menu_filter_success_toast) + ": "
-							+ item.getTitle(), Toast.LENGTH_SHORT).show();
+							+ mApplication.getTimeFilter(), Toast.LENGTH_SHORT)
+					.show();
+			new GetReportTask().execute();
 			break;
 		default:
-			Log.i(TAG, "Time Filter : " + mApplication.getTimeFilter());
-			return super.onOptionsItemSelected(item);
+			break;
 		}
-		return false;
+		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
@@ -474,8 +491,11 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			ReportGetter mReportGetter = new ReportGetter(new HoaHelper(
 					TrafficNetworkClient.ADDRESS));
 			try {
-				Log.i(TAG, "getReport start");
-				return mReportGetter.getReports(mApplication.getTimeFilter());
+				Log.i(TAG, "getReport("+mApplication.getTimeFilter()+") start");
+				//TEST
+				return mReportGetter.getReports(3600*12);
+				//END TEST
+			//return mReportGetter.getReports(mApplication.getTimeFilter());
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -550,7 +570,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		protected void onPostExecute(Boolean result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
-			setProgressBarVisibility(false);
+			setProgressBarIndeterminateVisibility(false);
 			if (result) {
 
 				imvSmall.setImageBitmap(tmpBitmapImage);
@@ -603,18 +623,91 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		mBundle.putString(IncidentDetailActivity.DOWNVOTE, tvDownVote.getText()
 				.toString());
 		// ImageUrl
-		Log.i(TAG, "image : " + curReport.getImage());
 		mBundle.putString(IncidentDetailActivity.IMAGE, curReport.getImage());
 		// Description
 		if (!tvDes.getText().equals("")) {
 			mBundle.putString(IncidentDetailActivity.DESCRIPTION, tvDes
 					.getText().toString());
-			Log.i(TAG, "put String Des:" + tvDes.getText());
 		}
 		// ID
 		mBundle.putInt(IncidentDetailActivity.ID, curReport.getCautionID());
+
 		oIntent.putExtras(mBundle);
 		startActivity(oIntent);
 
+	}
+
+	public class VoteTask extends AsyncTask<String, String, int[]> {
+		String vote = "";
+
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+			setProgressBarIndeterminateVisibility(true);
+		}
+
+		@Override
+		protected int[] doInBackground(String... params) {
+			// TODO Auto-generated method stub
+			vote = params[0];
+			VoteSetGetter mVoteSetGetter = new VoteSetGetter(new HoaHelper(
+					TrafficNetworkClient.ADDRESS));
+			try {
+				if (params[0].equals(IncidentDetailActivity.UPVOTE)) {
+
+					mVoteSetGetter.vote(mApplication.getUser(),
+							curReport.getCautionID(), true);
+
+				} else if (params[0].equals(IncidentDetailActivity.DOWNVOTE)) {
+					mVoteSetGetter.vote(mApplication.getUser(),
+							curReport.getCautionID(), false);
+
+				}
+
+				return mVoteSetGetter.getVote(curReport.getCautionID());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				Log.i(TAG, e.getMessage());
+				publishProgress(e.getMessage() + "");
+			}
+			return null;
+		}
+
+		@Override
+		protected void onProgressUpdate(String... values) {
+			// TODO Auto-generated method stub
+			super.onProgressUpdate(values);
+			if (values[0].equals(getText(R.string.network_error))) {
+
+				Toast.makeText(TrafficMap.this,
+						getText(R.string.network_error), Toast.LENGTH_SHORT)
+						.show();
+
+			}
+		}
+
+		@Override
+		protected void onPostExecute(int[] result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			setProgressBarIndeterminateVisibility(false);
+			if (result == null) {
+				return;
+			}
+			Log.i(TAG, result[0] + ":" + result[1]);
+			tvUpVote.setText(Integer.toString(result[0]));
+			tvDownVote.setText(result[1] + "");
+
+		}
+
+	}
+
+	public void voteUp(View v) {
+		new VoteTask().execute(IncidentDetailActivity.UPVOTE);
+	}
+
+	public void voteDown(View v) {
+		new VoteTask().execute(IncidentDetailActivity.DOWNVOTE);
 	}
 }

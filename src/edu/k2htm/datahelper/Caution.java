@@ -7,6 +7,7 @@ import android.util.Log;
 
 
 
+
 public class Caution {
 	public static final String TAG = "Caution";
 	public static final short JAM = 1;

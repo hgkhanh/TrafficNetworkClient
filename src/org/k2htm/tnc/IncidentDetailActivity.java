@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,6 +27,7 @@ import android.widget.Toast;
 import edu.k2htm.clientHelper.HoaHelper;
 import edu.k2htm.datahelper.Comment;
 import edu.k2htm.datahelper.CommentGetter;
+import edu.k2htm.datahelper.VoteSetGetter;
 
 public class IncidentDetailActivity extends Activity {
 	private ListView lvComment;
@@ -37,9 +39,7 @@ public class IncidentDetailActivity extends Activity {
 	private ImageView imvSmall, imvBig;
 	private Bitmap tmpBitmapImage;
 	private int cautionID;
-	private boolean isRunning = true;
 	private TrafficNetworkClient mApplication;
-	private GetCommentTask mGetCommentTask;
 	public static final String USERNAME = "username";
 	public static final String TYPE = "type";
 	public static final String TIME = "time";
@@ -54,6 +54,8 @@ public class IncidentDetailActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+
 		setContentView(R.layout.activity_incident_details);
 		// get app object
 		mApplication = (TrafficNetworkClient) getApplication();
@@ -70,6 +72,9 @@ public class IncidentDetailActivity extends Activity {
 		imvSmall = (ImageView) findViewById(R.id.imvSmall);
 		imvBig = (ImageView) findViewById(R.id.imvBig);
 		btnSendComment = (Button) findViewById(R.id.btnSendComment);
+		// set loading image
+		imvSmall.setImageResource(R.drawable.loading_image);
+		imvBig.setImageResource(R.drawable.loading_image);
 		// set on Click
 		btnSendComment.setOnClickListener(new OnClickListener() {
 
@@ -77,15 +82,20 @@ public class IncidentDetailActivity extends Activity {
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
 				Log.i(TAG, "click");
-				if (!edtContentComment.getText().toString().equals(""))
+				if (!edtContentComment.getText().toString().equals("")) {
 					new SendCommentTask().execute(edtContentComment.getText()
 							.toString());
+				} else {
+					new GetCommentTask().execute(cautionID);
+				}
+
 				edtContentComment.setText("");
 			}
 		});
 		// hide imvBig
 		imvBig.setVisibility(View.GONE);
 		loadInfo();
+		// load comment
 		new GetCommentTask().execute(cautionID);
 		// loadComment();
 	}
@@ -103,17 +113,10 @@ public class IncidentDetailActivity extends Activity {
 		switch (item.getItemId()) {
 		case R.id.comment_refresh:
 			new GetCommentTask().execute(cautionID);
+			new VoteTask().execute("getvote");
 			break;
 		}
 		return super.onOptionsItemSelected(item);
-	}
-
-	@Override
-	protected void onStop() {
-		// TODO Auto-generated method stub
-		super.onStop();
-		isRunning = false;
-		mGetCommentTask.cancel(true);
 	}
 
 	private void loadInfo() {
@@ -164,6 +167,11 @@ public class IncidentDetailActivity extends Activity {
 	}
 
 	private class GetImageTask extends AsyncTask<String, String, Boolean> {
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+		}
 
 		@Override
 		protected Boolean doInBackground(String... url) {
@@ -205,7 +213,6 @@ public class IncidentDetailActivity extends Activity {
 
 	private class GetCommentTask extends
 			AsyncTask<Integer, ArrayList<Comment>, Void> {
-		CommentItemAdapter adapter;
 
 		@Override
 		protected void onPreExecute() {
@@ -228,10 +235,7 @@ public class IncidentDetailActivity extends Activity {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				Log.i(TAG, e.getMessage());
-				if (isRunning) {
-					publishProgress(null);
-				}
-
+				publishProgress(null);
 			}
 
 			return null;
@@ -254,9 +258,7 @@ public class IncidentDetailActivity extends Activity {
 		protected void onPostExecute(Void result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
-			lvComment.setAdapter(adapter);
-
-			setProgressBarIndeterminateVisibility(true);
+			setProgressBarIndeterminateVisibility(false);
 		}
 
 	}
@@ -282,7 +284,7 @@ public class IncidentDetailActivity extends Activity {
 			try {
 				Log.i(TAG, "send comment");
 				mComment.sendComment();
-				publishProgress("ok");
+				publishProgress("Comment Sent!");
 				return new CommentGetter(cautionID, new HoaHelper(
 						TrafficNetworkClient.ADDRESS)).getComments(cautionID);
 			} catch (Exception e) {
@@ -305,27 +307,94 @@ public class IncidentDetailActivity extends Activity {
 		protected void onPostExecute(ArrayList<Comment> result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
-			setProgressBarVisibility(false);
+			setProgressBarIndeterminateVisibility(false);
 			if (result != null) {
 				loadComment(result);
 			}
 		}
 	}
 
-	public void showBigImage(View v) {
+	public void showImage(View v) {
 		imvBig.setVisibility(View.VISIBLE);
 
 	}
 
-	public void hideBigImage(View v) {
+	public void hideImage(View v) {
 		imvBig.setVisibility(View.GONE);
+	}
+
+	public class VoteTask extends AsyncTask<String, String, int[]> {
+		String vote = "";
+
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+			setProgressBarIndeterminateVisibility(true);
+		}
+
+		@Override
+		protected int[] doInBackground(String... params) {
+			// TODO Auto-generated method stub
+			vote = params[0];
+			VoteSetGetter mVoteSetGetter = new VoteSetGetter(new HoaHelper(
+					TrafficNetworkClient.ADDRESS));
+			try {
+				if (params[0].equals(IncidentDetailActivity.UPVOTE)) {
+
+					mVoteSetGetter
+							.vote(mApplication.getUser(), cautionID, true);
+
+				} else if (params[0].equals(IncidentDetailActivity.DOWNVOTE)) {
+					mVoteSetGetter.vote(mApplication.getUser(), cautionID,
+							false);
+
+				}
+
+				return mVoteSetGetter.getVote(cautionID);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				Log.i(TAG, e.getMessage());
+				publishProgress(e.getMessage() + "");
+			}
+			return null;
+		}
+
+		@Override
+		protected void onProgressUpdate(String... values) {
+			// TODO Auto-generated method stub
+			super.onProgressUpdate(values);
+			if (values[0].equals(getText(R.string.network_error))) {
+
+				Toast.makeText(IncidentDetailActivity.this,
+						getText(R.string.network_error), Toast.LENGTH_SHORT)
+						.show();
+
+			}
+		}
+
+		@Override
+		protected void onPostExecute(int[] result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			setProgressBarIndeterminateVisibility(false);
+			if (result == null) {
+				return;
+			}
+			Log.i(TAG, result[0] + ":" + result[1]);
+			tvUpVote.setText(Integer.toString(result[0]));
+			tvDownVote.setText(result[1] + "");
+
+		}
+
 	}
 
 	public void voteUp(View v) {
 
+		new VoteTask().execute(IncidentDetailActivity.UPVOTE);
 	}
 
 	public void voteDown(View v) {
-
+		new VoteTask().execute(IncidentDetailActivity.DOWNVOTE);
 	}
 }
