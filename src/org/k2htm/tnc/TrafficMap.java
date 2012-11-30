@@ -278,6 +278,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	}
 
 	public void drawIncidentOverlay(ArrayList<Report> result) {
+		mapView.getOverlays().clear();
 		mApplication.setReportList(result);
 		List<Overlay> overlays = mapView.getOverlays();
 		// create
@@ -291,7 +292,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		/*
 		 * read from ArrayList
 		 */
-		Log.i(TAG, "read List");
+		Log.i(TAG, "read List:"+result.size());
 		//
 		// String tmp_lat;
 		// String tmp_long;
@@ -421,6 +422,15 @@ public class TrafficMap extends MapActivity implements LocationListener {
 					.show();
 			new GetReportTask().execute();
 			break;
+		case R.id.hour12:
+			mApplication.setTimeFilter(720);
+			Toast.makeText(
+					TrafficMap.this,
+					getString(R.string.menu_filter_success_toast) + ": "
+							+ mApplication.getTimeFilter(), Toast.LENGTH_SHORT)
+					.show();
+			new GetReportTask().execute();
+			break;
 		default:
 			break;
 		}
@@ -493,7 +503,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			try {
 				Log.i(TAG, "getReport("+mApplication.getTimeFilter()+") start");
 				//TEST
-				return mReportGetter.getReports(3600*12);
+				return mReportGetter.getReports(mApplication.getTimeFilter());
 				//END TEST
 			//return mReportGetter.getReports(mApplication.getTimeFilter());
 

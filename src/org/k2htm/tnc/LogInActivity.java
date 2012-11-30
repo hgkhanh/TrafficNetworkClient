@@ -3,6 +3,8 @@ package org.k2htm.tnc;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,7 +30,6 @@ import com.facebook.android.DialogError;
 import com.facebook.android.Facebook;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
-import com.facebook.android.Util;
 
 import edu.k2htm.clientHelper.DuplicateUserException;
 import edu.k2htm.clientHelper.HoaHelper;
@@ -68,8 +69,6 @@ public class LogInActivity extends Activity {
 			public void onClick(View v) {
 				facebook.authorize(LogInActivity.this, new DialogListener() {
 					public void onComplete(Bundle values) {
-
-Log.i(TAG,"onComplete");
 						// The user has logged in, so now you can query and
 						// use their Facebook info
 						mAsyncRunner.request("me", new RequestListener() {
@@ -77,19 +76,25 @@ Log.i(TAG,"onComplete");
 							@Override
 							public void onComplete(String response, Object state) {
 								// TODO Auto-generated method stub
-								Log.i(TAG,"onComplete");
-								try {		
+								try {
 									Log.i(TAG, response);
-									//parse JSON
-									 JSONObject jsonObj = new JSONObject(response);
-									 Log.i(TAG, jsonObj.getString("username"));
+									// parse JSON
+									JSONObject jsonObj = new JSONObject(
+											response);
+									Log.i(TAG, jsonObj.getString("username"));
+									// save info to App obj
+									mApplication.setFbJson(response);
+									mApplication.setUser(jsonObj.getString("username")+"@facebook.com");
+									mApplication.setLoginAsFb(true);
+									// login / reg with server
+									new LoginAsFBTask().execute(jsonObj.getString("username")+"@facebook.com");
 								} catch (FacebookError e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								} catch (JSONException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
-								} 
+								}
 							}
 
 							@Override
@@ -234,7 +239,6 @@ Log.i(TAG,"onComplete");
 
 				Log.i(TAG, "doinbackground result=checkuser()");
 				result = mUser.checkUser();
-
 				Log.i(TAG, "result=checkuser() ook\n result = " + result);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -263,6 +267,8 @@ Log.i(TAG,"onComplete");
 				Log.i(TAG, "check_usr_ok");
 				// SET CURRENT USER IN APPLICATION OBJECT
 				mApplication.setUser(edtUsr.getText().toString());
+				mApplication.setLoginAsFb(false);
+				mApplication.setFbJson("");
 				Log.i(TAG, "Logged in as : " + mApplication.getUser());
 				// call intent
 				Intent oIntent = new Intent(LogInActivity.this,
@@ -290,25 +296,68 @@ Log.i(TAG,"onComplete");
 
 	private class LoginAsFBTask extends AsyncTask<String, String, Boolean> {
 		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+		}
+		@Override
 		protected Boolean doInBackground(String... params) {
-			User mUser = new User(params[0], genPass(), new HoaHelper(
-					TrafficNetworkClient.ADDRESS));
+			// new User with password == md5Encode of Username
+			User mUser = new User(params[0], md5Encode(params[0]),
+					new HoaHelper(TrafficNetworkClient.ADDRESS));
+			Log.i(TAG, "new User : " + params[0] + ":" + md5Encode(params[0]));
 			try {
-				mUser.register();
+				mUser.register();		
+				
 			} catch (DuplicateUserException ex) {
+				publishProgress("Login with Facebook account");
 				return true;
 			} catch (Exception e) {
 				publishProgress(getText(R.string.network_error) + "");
+				return false;
 			}
-			return false;
+			publishProgress("Login with Facebook account");
+			return true;
 		}
 
 		@Override
 		protected void onProgressUpdate(String... values) {
 			// TODO Auto-generated method stub
 			super.onProgressUpdate(values);
-			Toast.makeText(LogInActivity.this, "Network Error",
+			Toast.makeText(LogInActivity.this,values[0],
 					Toast.LENGTH_SHORT).show();
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			check_usr_ok = result;
+			Log.i(TAG, check_usr_ok + "!");
+			if (check_usr_ok) {
+				Log.i(TAG, "check_usr_ok");
+				// SET CURRENT USER IN APPLICATION OBJECT
+				Log.i(TAG, "Logged in as : " + mApplication.getUser());
+				// call intent
+				Intent oIntent = new Intent(LogInActivity.this,
+						TrafficMap.class);
+				startActivity(oIntent);
+				Log.i(TAG,
+						"Login successfully. To TrafficMap.class . Finalize LogInActivity.this");
+				try {
+					this.finalize();
+				} catch (Throwable e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			} else {
+				Log.i(TAG, "check_usr_ok==false");
+				Toast.makeText(LogInActivity.this,
+						R.string.toast_usr_pass_check_failed,
+						Toast.LENGTH_SHORT).show();
+			}
+
 		}
 
 	}
@@ -321,9 +370,27 @@ Log.i(TAG,"onComplete");
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		 facebook.authorizeCallback(requestCode, resultCode, data);
-		// Bundle mBundle = data.getExtras();
-Log.i(TAG,"onActivityResult");
-		// new LoginAsFBTask().execute(facebook.request(me));
+		finish();
+		facebook.authorizeCallback(requestCode, resultCode, data);
+	}
+
+	public String md5Encode(String s) {
+		try {
+			// Create MD5 Hash
+			MessageDigest digest = java.security.MessageDigest
+					.getInstance("MD5");
+			digest.update(s.getBytes());
+			byte messageDigest[] = digest.digest();
+
+			// Create Hex String
+			StringBuffer hexString = new StringBuffer();
+			for (int i = 0; i < messageDigest.length; i++)
+				hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
+			return hexString.toString();
+
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return "";
 	}
 }

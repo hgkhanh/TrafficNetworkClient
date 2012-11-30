@@ -21,7 +21,6 @@ public class WelcomeScreen extends Activity {
 	protected void onPause() {
 		// TODO Auto-generated method stub
 		super.onPause();
-		finish();
 	}
 
 	@Override

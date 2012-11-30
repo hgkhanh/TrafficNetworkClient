@@ -1,5 +1,9 @@
 package org.k2htm.tnc;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -9,21 +13,31 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.facebook.android.AsyncFacebookRunner;
+import com.facebook.android.BaseDialogListener;
+import com.facebook.android.Facebook;
+
 import edu.k2htm.clientHelper.HoaHelper;
 import edu.k2htm.datahelper.Comment;
 import edu.k2htm.datahelper.CommentGetter;
@@ -32,11 +46,13 @@ import edu.k2htm.datahelper.VoteSetGetter;
 public class IncidentDetailActivity extends Activity {
 	private ListView lvComment;
 	private Button btnSendComment;
+	private ImageButton  btnShare;
 	private EditText edtContentComment;
 	private TextView tvUsername, tvDes;
 	private TextView tvType, tvTime;
 	private TextView tvUpVote, tvDownVote;
 	private ImageView imvSmall, imvBig;
+	private String tmpImageUri;
 	private Bitmap tmpBitmapImage;
 	private int cautionID;
 	private TrafficNetworkClient mApplication;
@@ -49,6 +65,9 @@ public class IncidentDetailActivity extends Activity {
 	public static final String IMAGE = "image";
 	public static final String ID = "cautionID";
 	private static final String TAG = "IncidentDetailActivity";
+	// facebook
+	Facebook mFacebook = new Facebook("294323060688115");
+	AsyncFacebookRunner mAsyncRunner = new AsyncFacebookRunner(mFacebook);
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -72,10 +91,36 @@ public class IncidentDetailActivity extends Activity {
 		imvSmall = (ImageView) findViewById(R.id.imvSmall);
 		imvBig = (ImageView) findViewById(R.id.imvBig);
 		btnSendComment = (Button) findViewById(R.id.btnSendComment);
+		btnShare = (ImageButton) findViewById(R.id.btnShare);
 		// set loading image
 		imvSmall.setImageResource(R.drawable.loading_image);
 		imvBig.setImageResource(R.drawable.loading_image);
 		// set on Click
+
+		// btnb share
+		btnShare.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if (tmpBitmapImage != null) {
+
+					Intent shareIntent = new Intent(Intent.ACTION_SEND);
+					shareIntent.putExtra(Intent.EXTRA_TEXT, tvDes.getText());
+					// put image
+					shareIntent.putExtra(android.content.Intent.EXTRA_STREAM,
+							getUrifromBitmap(tmpBitmapImage));
+					shareIntent.setType("image/jpeg");
+					startActivity(Intent
+							.createChooser(shareIntent, "Share via"));
+
+				} else {
+					Toast.makeText(IncidentDetailActivity.this,
+							"Image is still loading. Please wait a moment.",
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+		});
+		// btn send comment
 		btnSendComment.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -191,7 +236,6 @@ public class IncidentDetailActivity extends Activity {
 				conn.connect();
 				InputStream is = conn.getInputStream();
 				tmpBitmapImage = BitmapFactory.decodeStream(is);
-
 				return true;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -311,6 +355,7 @@ public class IncidentDetailActivity extends Activity {
 			if (result != null) {
 				loadComment(result);
 			}
+
 		}
 	}
 
@@ -397,4 +442,52 @@ public class IncidentDetailActivity extends Activity {
 	public void voteDown(View v) {
 		new VoteTask().execute(IncidentDetailActivity.DOWNVOTE);
 	}
+
+	/*
+	 * Callback after the message has been posted on friend's wall.
+	 */
+	public class PostDialogListener extends BaseDialogListener {
+		@Override
+		public void onComplete(Bundle values) {
+			final String postId = values.getString("post_id");
+			if (postId != null) {
+				Toast.makeText(IncidentDetailActivity.this,
+						"Message posted on your timeline.", Toast.LENGTH_SHORT)
+						.show();
+			} else {
+				Toast.makeText(IncidentDetailActivity.this,
+						"No message posted.", Toast.LENGTH_SHORT).show();
+			}
+		}
+
+	}
+
+	// save tmpBitmap to disk to get Uri
+	public Uri getUrifromBitmap(Bitmap bitmapImage) {
+		if (bitmapImage != null) {
+			FileOutputStream fileOutputStream = null;
+			File file = new File(Environment.getExternalStorageDirectory(),
+					"tmp.jpg");
+			try {
+				fileOutputStream = new FileOutputStream(file);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			BufferedOutputStream bos = new BufferedOutputStream(
+					fileOutputStream);
+			tmpBitmapImage.compress(CompressFormat.JPEG, 100, bos);
+			try {
+				bos.flush();
+				bos.close();
+				fileOutputStream.flush();
+				fileOutputStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return Uri.fromFile(file);
+		} else {
+			return null;
+		}
+	}
+
 }

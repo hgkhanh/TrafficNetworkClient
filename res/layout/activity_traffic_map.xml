@@ -9,7 +9,7 @@
         android:layout_height="fill_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:apiKey="0pO5vO6nJAszQbx_D4JwG6up9P9QIU_9F5BLW_g"
+        android:apiKey="@string/api_key_desktop"
         android:clickable="true" >
     </com.google.android.maps.MapView>
 
@@ -98,6 +98,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@drawable/box_shadows"
+        android:clickable="true"
+        android:onClick="toDetailAct"
         android:orientation="vertical"
         android:paddingBottom="30dp"
         android:paddingLeft="10dp"
@@ -154,7 +156,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="By: "
-                            android:textSize="20sp" />
+                            android:textSize="13sp" />
 
                         <TextView
                             android:id="@+id/tvUsername"
@@ -162,7 +164,7 @@
                             android:layout_height="wrap_content"
                             android:text="Username"
                             android:textColor="#FF6600"
-                            android:textSize="20sp" />
+                            android:textSize="13sp" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
@@ -247,7 +249,7 @@
                         android:clickable="true"
                         android:onClick="voteDown"
                         android:scaleType="centerInside"
-                        android:src="@drawable/btn_downvote_bg"/>
+                        android:src="@drawable/btn_downvote_bg" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
@@ -256,8 +258,6 @@
             android:id="@+id/llComment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:clickable="true"
-            android:onClick="toDetailAct"
             android:orientation="horizontal" >
 
             <LinearLayout

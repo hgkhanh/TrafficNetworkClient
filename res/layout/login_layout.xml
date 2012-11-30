@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:background="@drawable/bg"
     android:orientation="vertical" >
 
     <LinearLayout
@@ -11,13 +12,15 @@
         android:gravity="center"
         android:orientation="vertical" >
 
-        <TextView
+        <!--
+             <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/login_act_header"
             android:textColor="#FF6600"
             android:textSize="30sp" />
+        -->
     </LinearLayout>
 
     <LinearLayout
@@ -33,55 +36,66 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10sp"
+            android:background="@drawable/edt_username"
+            android:gravity="center_vertical"
             android:hint="@string/username_edt_hint"
-            android:padding="5sp"
+            android:paddingLeft="40sp"
+            android:paddingTop="10sp"
             android:singleLine="true"
+            android:textColor="@android:color/white"
             android:textSize="18sp" />
 
         <EditText
             android:id="@+id/edtPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_margin="10sp"
+            android:background="@drawable/edt_pass"
             android:hint="@string/password_edt_hint"
             android:inputType="textPassword"
-            android:padding="5sp"
+            android:paddingLeft="40sp"
+            android:paddingTop="10sp"
             android:singleLine="true"
+            android:textColor="@android:color/white"
             android:textSize="18sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="right"
+            android:gravity="center"
             android:orientation="horizontal" >
 
             <Button
-                android:id="@+id/btnFacebook"
-                android:layout_width="wrap_content"
+                android:id="@+id/btnReg"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="left"
-                android:text="FaceBook Login" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-                <Button
-                    android:id="@+id/btnReg"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10sp"
-                    android:background="@android:color/transparent"
-                    android:text="@string/reg_text_btn" />
-            </LinearLayout>
+                android:layout_margin="20sp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_signup_bg" />
 
             <Button
                 android:id="@+id/btnConfirm"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="15sp"
-                android:text="@string/btn_confirm" />
+                android:layout_margin="20sp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_login_bg" />
         </LinearLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1sp"
+            android:layout_margin="10sp"
+            android:background="@android:color/darker_gray" />
+
+        <Button
+            android:id="@+id/btnFacebook"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10sp"
+            android:background="@drawable/btn_fb_bg" />
     </LinearLayout>
 
 </LinearLayout>

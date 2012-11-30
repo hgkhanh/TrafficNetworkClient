@@ -36,11 +36,12 @@
         </activity>
         <activity
             android:name=".LogInActivity"
-            android:label="@string/title_activity_main" >
+            android:label="@string/title_activity_login"
+            android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>
         <activity
             android:name=".RegisterActivity"
-            android:label="@string/title_activity_main" >
+            android:label="@string/title_activity_signup" >
         </activity>
         <activity
             android:name=".TrafficMap"
@@ -58,12 +59,6 @@
 
         <activity
             android:name=".ReportMap"
-            android:label="@string/title_activity_traffic_map"
-            android:windowSoftInputMode="stateHidden|adjustResize" >
-        </activity>
-        
-        <activity
-            android:name="org.k2htm.tnc.FbLogin"
             android:label="@string/title_activity_traffic_map"
             android:windowSoftInputMode="stateHidden|adjustResize" >
         </activity>

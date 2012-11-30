@@ -218,6 +218,9 @@ public class ReportMap extends MapActivity {
 				}
 			}
 		}
+		if(imvImage.getDrawable()==null){
+			imvImage.setBackgroundResource(R.drawable.btn_camera);
+		}
 	}
 
 	public void centerToCurrentLocation(View view) {
