@@ -35,7 +35,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.android.AsyncFacebookRunner;
-import com.facebook.android.BaseDialogListener;
 import com.facebook.android.Facebook;
 
 import edu.k2htm.clientHelper.HoaHelper;
@@ -46,7 +45,7 @@ import edu.k2htm.datahelper.VoteSetGetter;
 public class IncidentDetailActivity extends Activity {
 	private ListView lvComment;
 	private Button btnSendComment;
-	private ImageButton  btnShare;
+	private ImageButton btnShare;
 	private EditText edtContentComment;
 	private TextView tvUsername, tvDes;
 	private TextView tvType, tvTime;
@@ -441,25 +440,6 @@ public class IncidentDetailActivity extends Activity {
 
 	public void voteDown(View v) {
 		new VoteTask().execute(IncidentDetailActivity.DOWNVOTE);
-	}
-
-	/*
-	 * Callback after the message has been posted on friend's wall.
-	 */
-	public class PostDialogListener extends BaseDialogListener {
-		@Override
-		public void onComplete(Bundle values) {
-			final String postId = values.getString("post_id");
-			if (postId != null) {
-				Toast.makeText(IncidentDetailActivity.this,
-						"Message posted on your timeline.", Toast.LENGTH_SHORT)
-						.show();
-			} else {
-				Toast.makeText(IncidentDetailActivity.this,
-						"No message posted.", Toast.LENGTH_SHORT).show();
-			}
-		}
-
 	}
 
 	// save tmpBitmap to disk to get Uri

@@ -56,7 +56,6 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	private GeoPoint currentPoint;
 	private Location currentLocation = null;
 	private TrafficOverlay currPosOverlay;
-	private Button btnReport;
 	private TextView tvProvider;
 	private Bitmap tmpBitmapImage;
 	private boolean refreshing = false;
@@ -97,7 +96,6 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		// find view
 		imvBig = (ImageView) findViewById(R.id.imvBig);
 		imvSmall = (ImageView) findViewById(R.id.imvSmall);
-		btnReport = (Button) findViewById(R.id.btnReport);
 		tvProvider = ((TextView) findViewById(R.id.providerText));
 		mapView = (MapView) findViewById(R.id.mapView);
 		llDetail = (LinearLayout) findViewById(R.id.llDetail);
@@ -128,19 +126,6 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		animateToCurrentLocation();
 		drawCurrPositionOverlay();
 
-		// set button listener
-		btnReport.setOnClickListener(new OnClickListener() {
-
-			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
-				Bundle oBundle = new Bundle();
-				oBundle.putInt(LAT, currentPoint.getLatitudeE6());
-				oBundle.putInt(LONG, currentPoint.getLongitudeE6());
-				Intent oIntent = new Intent(TrafficMap.this, ReportMap.class);
-				oIntent.putExtras(oBundle);
-				startActivityForResult(oIntent, REQUEST_CODE);
-			}
-		});
 	}
 
 	public void centerToCurrentLocation(View view) {
@@ -279,6 +264,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 
 	public void drawIncidentOverlay(ArrayList<Report> result) {
 		mapView.getOverlays().clear();
+		drawCurrPositionOverlay();
 		mApplication.setReportList(result);
 		List<Overlay> overlays = mapView.getOverlays();
 		// create
@@ -292,7 +278,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		/*
 		 * read from ArrayList
 		 */
-		Log.i(TAG, "read List:"+result.size());
+		Log.i(TAG, "read List:" + result.size());
 		//
 		// String tmp_lat;
 		// String tmp_long;
@@ -312,7 +298,7 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			// Log.i(TAG, "tmp_type:" + tmp_type);
 			// des_string = curReport.getDescription();
 			// Log.i(TAG, "tmp_des:" + des_string);
-			// imageUri = curReport.getImage();  
+			// imageUri = curReport.getImage();
 			// Log.i(TAG, "image uri:" + imageUri);
 			// username = curReport.getUsername();
 			// Log.i(TAG, "username:" + username);
@@ -366,13 +352,21 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_traffic_map, menu);
 
-		return true;  
+		return true;
 	}
 
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		// TODO Auto-generated method stub
 		switch (item.getItemId()) {
+		case R.id.menu_add:
+			Bundle oBundle = new Bundle();
+			oBundle.putInt(LAT, currentPoint.getLatitudeE6());
+			oBundle.putInt(LONG, currentPoint.getLongitudeE6());
+			Intent oIntent = new Intent(TrafficMap.this, ReportMap.class);
+			oIntent.putExtras(oBundle);
+			startActivityForResult(oIntent, REQUEST_CODE);
+			break;
 		case R.id.map_refresh:
 			new GetReportTask().execute();
 
@@ -423,6 +417,15 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			new GetReportTask().execute();
 			break;
 		case R.id.hour12:
+			mApplication.setTimeFilter(720);
+			Toast.makeText(
+					TrafficMap.this,
+					getString(R.string.menu_filter_success_toast) + ": "
+							+ mApplication.getTimeFilter(), Toast.LENGTH_SHORT)
+					.show();
+			new GetReportTask().execute();
+			break;
+		case R.id.type0:
 			mApplication.setTimeFilter(720);
 			Toast.makeText(
 					TrafficMap.this,
@@ -501,11 +504,13 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			ReportGetter mReportGetter = new ReportGetter(new HoaHelper(
 					TrafficNetworkClient.ADDRESS));
 			try {
-				Log.i(TAG, "getReport("+mApplication.getTimeFilter()+") start");
-				//TEST
+				Log.i(TAG, "getReport(" + mApplication.getTimeFilter()
+						+ ") start");
+				// TEST
 				return mReportGetter.getReports(mApplication.getTimeFilter());
-				//END TEST
-			//return mReportGetter.getReports(mApplication.getTimeFilter());
+				// END TEST
+				// return
+				// mReportGetter.getReports(mApplication.getTimeFilter());
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

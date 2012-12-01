@@ -9,7 +9,7 @@
         android:layout_height="fill_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:apiKey="@string/api_key_desktop"
+        android:apiKey="@string/api_key_laptop"
         android:clickable="true" >
     </com.google.android.maps.MapView>
 
@@ -83,12 +83,7 @@
             android:layout_weight="4"
             android:gravity="center" >
 
-            <Button
-                android:id="@+id/btnReport"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="5dp"
-                android:text="Report" />
+            
         </LinearLayout>
     </LinearLayout>
 

@@ -1,11 +1,6 @@
 package org.k2htm.tnc;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,11 +18,11 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -51,7 +46,6 @@ public class ReportMap extends MapActivity {
 	private MapView map = null;
 	private GeoPoint currentPoint;
 	private MyLocationOverlay me = null;
-	private Button btnConfirm;
 	private ImageView imvImage;
 	private TextView tvLat, tvLong;
 	private EditText edtDes;
@@ -70,7 +64,6 @@ public class ReportMap extends MapActivity {
 		// app object
 		mApplicaion = (TrafficNetworkClient) getApplication();
 		// get view
-		btnConfirm = (Button) findViewById(R.id.btnConfirm);
 		tvLat = ((TextView) findViewById(R.id.latitudeText));
 		tvLong = ((TextView) findViewById(R.id.longitudeText));
 		spnType = (Spinner) findViewById(R.id.spn_type);
@@ -82,63 +75,6 @@ public class ReportMap extends MapActivity {
 		// set text
 		tvLat.setText(String.valueOf((int) (currentPoint.getLatitudeE6())));
 		tvLong.setText(String.valueOf((int) (currentPoint.getLongitudeE6())));
-		// set button listener
-		btnConfirm.setOnClickListener(new OnClickListener() {
-
-			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
-				// check null type edt
-
-				try {
-					if (edtDes.getText().toString().equals("")) {
-						edtDes.setText("No Description.");
-					}
-					imageUriStr = getRealPathFromURI(imageUri);
-					Log.i(TAG,
-							"spinner select : "
-									+ spnType.getSelectedItemPosition()
-									+ "\nClick confirm "
-									+ tvLat.getText().toString() + " "
-									+ tvLong.getText().toString()
-									+ "\nImage uri:    " + imageUriStr);
-					// input
-					String username = mApplicaion.getUser();
-					short type = (short) spnType.getSelectedItemPosition();
-					int lat = Integer.parseInt(tvLat.getText().toString());
-					int lng = Integer.parseInt(tvLong.getText().toString());
-					File image;
-					if (imageUriStr.equals("")) {
-						imageUriStr = getText(R.drawable.default_image).toString();
-					} 
-
-						image = new File(imageUriStr);
-
-					String comment = edtDes.getText().toString();
-
-					// new Caution object
-					Caution mCaution = new Caution(username, type, lat, lng,
-							image, comment, new HoaHelper(
-									TrafficNetworkClient.ADDRESS));
-					Log.i(TAG, "Create report : " + "\nusername : " + username
-							+ "\ntype" + type + "\nCLat:Lng "
-							+ tvLat.getText().toString() + ":"
-							+ tvLong.getText().toString() + "\nDescription :"
-							+ comment + tvLong.getText().toString()
-							+ "\nImage uri: " + imageUriStr);
-
-					// SendToServer
-					new SendReportTask().execute(mCaution);
-					// writeToFile(Integer.parseInt(tvLat.getText().toString()),
-					// Integer.parseInt((tvLong.getText().toString())),
-					// spnType.getSelectedItemPosition(), edtDes.getText()
-					// .toString(), imageUriStr);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-				finish();
-			}
-		});
 
 		// mapview setting
 		map = (MapView) findViewById(R.id.map);
@@ -196,6 +132,72 @@ public class ReportMap extends MapActivity {
 	}
 
 	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.activity_report_map, menu);
+
+		return true;
+	}
+
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		// TODO Auto-generated method stub
+		switch (item.getItemId()) {
+		case R.id.menu_add_confirm:
+			try {
+				if (edtDes.getText().toString().equals("")) {
+					edtDes.setText("No Description.");
+				}
+				imageUriStr = getRealPathFromURI(imageUri);
+				Log.i(TAG,
+						"spinner select : " + spnType.getSelectedItemPosition()
+								+ "\nClick confirm "
+								+ tvLat.getText().toString() + " "
+								+ tvLong.getText().toString() + "\nImage uri: "
+								+ imageUriStr);
+				// input
+				String username = mApplicaion.getUser();
+				short type = (short) spnType.getSelectedItemPosition();
+				int lat = Integer.parseInt(tvLat.getText().toString());
+				int lng = Integer.parseInt(tvLong.getText().toString());
+				File image;
+				if (imageUriStr.equals("")) {
+					imageUriStr = getText(R.drawable.default_image).toString();
+				}
+
+				image = new File(imageUriStr);
+
+				String comment = edtDes.getText().toString();
+
+				// new Caution object
+				Caution mCaution = new Caution(username, type, lat, lng, image,
+						comment, new HoaHelper(TrafficNetworkClient.ADDRESS));
+				Log.i(TAG, "Create report : " + "\nusername : " + username
+						+ "\ntype" + type + "\nCLat:Lng "
+						+ tvLat.getText().toString() + ":"
+						+ tvLong.getText().toString() + "\nDescription :"
+						+ comment + tvLong.getText().toString()
+						+ "\nImage uri: " + imageUriStr);
+
+				// SendToServer
+				new SendReportTask().execute(mCaution);
+				// writeToFile(Integer.parseInt(tvLat.getText().toString()),
+				// Integer.parseInt((tvLong.getText().toString())),
+				// spnType.getSelectedItemPosition(), edtDes.getText()
+				// .toString(), imageUriStr);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			finish();
+			break;
+
+		default:
+			break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// TODO Auto-generated method stub
 		super.onActivityResult(requestCode, resultCode, data);
@@ -218,7 +220,7 @@ public class ReportMap extends MapActivity {
 				}
 			}
 		}
-		if(imvImage.getDrawable()==null){
+		if (imvImage.getDrawable() == null) {
 			imvImage.setBackgroundResource(R.drawable.btn_camera);
 		}
 	}
@@ -383,8 +385,8 @@ public class ReportMap extends MapActivity {
 	private void setCurLocation() {
 		Intent iIntent = getIntent();
 		Bundle iBundle = iIntent.getExtras();
-		currentPoint = new GeoPoint(iBundle.getInt(TrafficMap.LAT)+10,
-				iBundle.getInt(TrafficMap.LONG)+10);
+		currentPoint = new GeoPoint(iBundle.getInt(TrafficMap.LAT) + 10,
+				iBundle.getInt(TrafficMap.LONG) + 10);
 		Log.i("report", "lat: " + iBundle.getInt(TrafficMap.LAT) + "\nlong:"
 				+ iBundle.getInt(TrafficMap.LONG));
 	}
