@@ -129,7 +129,6 @@ public class ReportGetter {
 		this.reportGetHelper.init();
 		reports = getReportGetHelper().getReport(periodMin);
 		this.reportGetHelper.close();
-		Log.d(TAG, "Get Result:\n" + toString());
 		return reports;
 	}
 

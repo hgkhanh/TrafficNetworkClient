@@ -376,6 +376,7 @@ public class LogInActivity extends Activity {
 
 	public String md5Encode(String s) {
 		try {
+			Log.i(TAG,"gen MD5");
 			// Create MD5 Hash
 			MessageDigest digest = java.security.MessageDigest
 					.getInstance("MD5");
@@ -386,6 +387,8 @@ public class LogInActivity extends Activity {
 			StringBuffer hexString = new StringBuffer();
 			for (int i = 0; i < messageDigest.length; i++)
 				hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
+
+			Log.i(TAG,"gen MD5 complete");
 			return hexString.toString();
 
 		} catch (NoSuchAlgorithmException e) {

@@ -20,36 +20,32 @@
         android:showAsAction="always"
         android:title="@string/menu_time_filter">
         <menu>
-            <item
-                android:id="@+id/min10"
-                android:checkable="true"
-                android:checked="false"
-                android:title="10 min"/>
-            <item
-                android:id="@+id/min30"
-                android:checkable="true"
-                android:checked="false"
-                android:title="30 min"/>
-            <item
-                android:id="@+id/hour1"
-                android:checkable="true"
-                android:checked="false"
-                android:title="1 h"/>
-            <item
-                android:id="@+id/hour3"
-                android:checkable="true"
-                android:checked="false"
-                android:title="3 h"/>
-            <item
-                android:id="@+id/hour6"
-                android:checkable="true"
-                android:checked="false"
-                android:title="6 h"/>
-            <item
-                android:id="@+id/hour12"
-                android:checkable="true"
-                android:checked="true"
-                android:title="12 h"/>
+            <group
+                android:id="@+id/time_filter_group"
+                android:checkableBehavior="single" >
+                <item
+                    android:id="@+id/min10"
+                    android:title="10 min"/>
+                <item
+                    android:id="@+id/min30"
+                    android:title="30 min"/>
+                <item
+                    android:id="@+id/hour1"
+                    android:title="1 h"/>
+                <item
+                    android:id="@+id/hour3"
+                    android:title="3 h"/>
+                <item
+                    android:id="@+id/hour6"
+                    android:title="6 h"/>
+                <item
+                    android:id="@+id/hour12"
+                    android:checked="true"
+                    android:title="12 h"/>
+                 <item
+                    android:id="@+id/all"
+                    android:title="all"/>
+            </group>
         </menu>
     </item>
     <item
@@ -63,16 +59,19 @@
                 android:id="@+id/type0"
                 android:checkable="true"
                 android:checked="true"
+                android:orderInCategory="1"
                 android:title="@string/incident_type_0"/>
             <item
                 android:id="@+id/type1"
                 android:checkable="true"
                 android:checked="true"
+                android:orderInCategory="2"
                 android:title="@string/incident_type_1"/>
             <item
                 android:id="@+id/type2"
                 android:checkable="true"
                 android:checked="true"
+                android:orderInCategory="3"
                 android:title="@string/incident_type_2"/>
         </menu>
     </item>

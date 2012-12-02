@@ -15,7 +15,7 @@ public class WelcomeScreen extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_layout);
 		
-	}
+	} 
 
 	@Override
 	protected void onPause() {
@@ -33,13 +33,13 @@ public class WelcomeScreen extends Activity {
 	class Next extends AsyncTask<Void, Void, Void> {
 		@Override
 		protected Void doInBackground(Void... params) {
-			try {
-				Thread.sleep(3000);
+			try {   
+				Thread.sleep(5000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}  
-			return null;
+			return null;  
 		}
 
 		@Override

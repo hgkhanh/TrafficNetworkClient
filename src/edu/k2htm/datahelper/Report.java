@@ -105,6 +105,8 @@ public class Report {
 		buffer.append(this.lat + " " + this.lng + "\n");
 		buffer.append(this.time + "\n");
 		buffer.append(this.type + "\n");
+		buffer.append("upvote"+this.voteUp + "\n");
+		buffer.append("downvote"+this.voteDown + "\n");
 		return buffer.toString();
 	}
 

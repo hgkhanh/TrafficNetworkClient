@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import edu.k2htm.datahelper.Comment;
+import com.readystatesoftware.mapviewballoons.R;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import edu.k2htm.datahelper.Comment;
 
 public class CommentItemAdapter extends BaseAdapter {
 

@@ -89,10 +89,9 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		setContentView(R.layout.activity_traffic_map);
 		// app obj
 		mApplication = (TrafficNetworkClient) getApplication();
-		Toast.makeText(
-				TrafficMap.this,
-				getText(R.string.login_user_toast) + " : "
-						+ mApplication.getUser(), Toast.LENGTH_SHORT).show();
+		Toast.makeText(TrafficMap.this,
+				getText(R.string.login_user_toast) + mApplication.getUser(),
+				Toast.LENGTH_SHORT).show();
 		// find view
 		imvBig = (ImageView) findViewById(R.id.imvBig);
 		imvSmall = (ImageView) findViewById(R.id.imvSmall);
@@ -133,26 +132,33 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	}
 
 	public void showDetail(IncidentOverlayItem overlayItem) throws Exception {
-
+		// clear
+		tvType.setText("");
+		// show Des
+		tvDes.setText("");
+		// show vote
+		tvUpVote.setText("");
+		tvUpVote.setText("");
+		// do
 		llDetail.setVisibility(View.VISIBLE);
 		imvSmall.setImageResource(R.drawable.loading_image);
 		imvBig.setImageResource(R.drawable.loading_image);
-		Log.i(TAG, "Show Detail");
 
 		curReport = overlayItem.getReport();
 
+		Log.i(TAG, "show detail of report :" + curReport.toString());
 		// tvType.setText(curReport.getType()+"");
 		// show Type
 		String typeStr = "";
 		switch (curReport.getType()) {
 		case TrafficMap.TRAFFIC_JAM_CODE:
-			typeStr = TRAFFIC_JAM_STRING;
+			typeStr = getText(R.string.incident_type_0) + "";
 			break;
 		case TrafficMap.ACCIDENT_CODE:
-			typeStr = ACCIDENT_STRING;
+			typeStr = getText(R.string.incident_type_1) + "";
 			break;
 		case TrafficMap.BLOCKED_CODE:
-			typeStr = BLOCKED_STRING;
+			typeStr = getText(R.string.incident_type_2) + "";
 			break;
 		default:
 			break;
@@ -268,12 +274,13 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		mApplication.setReportList(result);
 		List<Overlay> overlays = mapView.getOverlays();
 		// create
+		ArrayList<TrafficOverlay> incidentOverlays = new ArrayList<TrafficOverlay>();
 		Drawable marker = getResources().getDrawable(R.drawable.indicator_jam);
-		TrafficOverlay jamPos = new TrafficOverlay(marker, mapView, this);
+		incidentOverlays.add(new TrafficOverlay(marker, mapView, this));
 		marker = getResources().getDrawable(R.drawable.indicator_accident);
-		TrafficOverlay accidentPos = new TrafficOverlay(marker, mapView, this);
+		incidentOverlays.add(new TrafficOverlay(marker, mapView, this));
 		marker = getResources().getDrawable(R.drawable.indicator_blocked);
-		TrafficOverlay blockedPos = new TrafficOverlay(marker, mapView, this);
+		incidentOverlays.add(new TrafficOverlay(marker, mapView, this));
 
 		/*
 		 * read from ArrayList
@@ -323,29 +330,27 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			// draw correct icon at that position
 			switch (curReport.getType()) {
 			case TrafficMap.TRAFFIC_JAM_CODE:
-				jamPos.addOverlay(overlayItem);
+				incidentOverlays.get(TRAFFIC_JAM_CODE).addOverlay(overlayItem);
 				break;
 			case TrafficMap.ACCIDENT_CODE:
-				accidentPos.addOverlay(overlayItem);
+				incidentOverlays.get(ACCIDENT_CODE).addOverlay(overlayItem);
 				break;
 			case TrafficMap.BLOCKED_CODE:
-				blockedPos.addOverlay(overlayItem);
+				incidentOverlays.get(BLOCKED_CODE).addOverlay(overlayItem);
 				break;
 			default:
-				jamPos.addOverlay(overlayItem);
+				incidentOverlays.get(TRAFFIC_JAM_CODE).addOverlay(overlayItem);
 				break;
 			}
 		}
 
 		// add overlay (check setting to see which overlay to show)
-		overlays.add(jamPos);
-		overlays.add(accidentPos);
-		overlays.add(blockedPos);
-		// to point of incident
-		jamPos.setCurrentLocation(currentLocation);
-		accidentPos.setCurrentLocation(currentLocation);
-		blockedPos.setCurrentLocation(currentLocation);
-
+		boolean[] mShowType = mApplication.getShowType();
+		for (int index = 0; index < mShowType.length; index++) {
+			if (mShowType[index]) {
+				overlays.add(incidentOverlays.get(index));
+			}
+		}
 	}
 
 	@Override
@@ -358,6 +363,9 @@ public class TrafficMap extends MapActivity implements LocationListener {
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		// TODO Auto-generated method stub
+
+		boolean[] showType = mApplication.getShowType();
+		int index = item.getOrder() - 1;
 		switch (item.getItemId()) {
 		case R.id.menu_add:
 			Bundle oBundle = new Bundle();
@@ -373,65 +381,88 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			break;
 		case R.id.min10:
 			mApplication.setTimeFilter(10);
+
+			item.setChecked(true);
 			Toast.makeText(
 					TrafficMap.this,
-					getString(R.string.menu_filter_success_toast) + ": "
-							+ mApplication.getTimeFilter(), Toast.LENGTH_SHORT)
-					.show();
+					getString(R.string.menu_filter_success_toast) 
+							+ item.getTitle(), Toast.LENGTH_SHORT).show();
 			new GetReportTask().execute();
 			break;
 		case R.id.min30:
 			mApplication.setTimeFilter(30);
+
+			item.setChecked(true);
 			Toast.makeText(
 					TrafficMap.this,
-					getString(R.string.menu_filter_success_toast) + ": "
-							+ mApplication.getTimeFilter(), Toast.LENGTH_SHORT)
-					.show();
+					getString(R.string.menu_filter_success_toast) 
+							+ item.getTitle(), Toast.LENGTH_SHORT).show();
 			new GetReportTask().execute();
 			break;
 		case R.id.hour1:
 			mApplication.setTimeFilter(60);
+
+			item.setChecked(true);
 			Toast.makeText(
 					TrafficMap.this,
-					getString(R.string.menu_filter_success_toast) + ": "
-							+ mApplication.getTimeFilter(), Toast.LENGTH_SHORT)
-					.show();
+					getString(R.string.menu_filter_success_toast) 
+							+ item.getTitle(), Toast.LENGTH_SHORT).show();
 			new GetReportTask().execute();
 			break;
 		case R.id.hour3:
 			mApplication.setTimeFilter(180);
+
+			item.setChecked(true);
 			Toast.makeText(
 					TrafficMap.this,
-					getString(R.string.menu_filter_success_toast) + ": "
-							+ mApplication.getTimeFilter(), Toast.LENGTH_SHORT)
-					.show();
+					getString(R.string.menu_filter_success_toast)
+							+ item.getTitle(), Toast.LENGTH_SHORT).show();
 			new GetReportTask().execute();
 			break;
 		case R.id.hour6:
 			mApplication.setTimeFilter(360);
+
+			item.setChecked(true);
 			Toast.makeText(
 					TrafficMap.this,
-					getString(R.string.menu_filter_success_toast) + ": "
-							+ mApplication.getTimeFilter(), Toast.LENGTH_SHORT)
-					.show();
+					getString(R.string.menu_filter_success_toast) 
+							+ item.getTitle(), Toast.LENGTH_SHORT).show();
 			new GetReportTask().execute();
 			break;
 		case R.id.hour12:
 			mApplication.setTimeFilter(720);
+
+			item.setChecked(true);
 			Toast.makeText(
 					TrafficMap.this,
-					getString(R.string.menu_filter_success_toast) + ": "
-							+ mApplication.getTimeFilter(), Toast.LENGTH_SHORT)
-					.show();
+					getString(R.string.menu_filter_success_toast)
+							+ item.getTitle(), Toast.LENGTH_SHORT).show();
+			new GetReportTask().execute();
+			break;
+		case R.id.all:
+			mApplication.setTimeFilter(-1);
+
+			item.setChecked(true);
+			Toast.makeText(
+					TrafficMap.this,
+					getString(R.string.menu_filter_success_toast)
+							+ item.getTitle(), Toast.LENGTH_SHORT).show();
 			new GetReportTask().execute();
 			break;
 		case R.id.type0:
-			mApplication.setTimeFilter(720);
-			Toast.makeText(
-					TrafficMap.this,
-					getString(R.string.menu_filter_success_toast) + ": "
-							+ mApplication.getTimeFilter(), Toast.LENGTH_SHORT)
-					.show();
+			showType[index] = !(mApplication.getShowType())[index];
+			item.setChecked(!item.isChecked());
+			new GetReportTask().execute();
+			break;
+		case R.id.type1:
+
+			showType[index] = !(mApplication.getShowType())[index];
+			item.setChecked(!item.isChecked());
+			new GetReportTask().execute();
+			break;
+		case R.id.type2:
+			showType[index] = !(mApplication.getShowType())[index];
+			item.setChecked(!item.isChecked());
 			new GetReportTask().execute();
 			break;
 		default:
@@ -557,6 +588,21 @@ public class TrafficMap extends MapActivity implements LocationListener {
 			// TODO Auto-generated method stub
 			URL myFileUrl = null;
 			try {
+				// FIX VOTE
+				VoteSetGetter mVoteSetGetter = new VoteSetGetter(new HoaHelper(
+						TrafficNetworkClient.ADDRESS));
+
+				try {
+					curReport.setVoteUp(mVoteSetGetter.getVote(curReport
+							.getCautionID())[0]);
+					curReport.setVoteDown(mVoteSetGetter.getVote(curReport
+							.getCautionID())[1]);
+					Log.i(TAG, "curRep vote :" + curReport.getVoteUp() + ""
+							+ curReport.getVoteDown());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				// TEST
 				// myFileUrl = new URL(
 				// "http://www.belovedcars.com/wp-content/uploads/2012/03/2012-traffic-jam.jpg");
@@ -585,6 +631,8 @@ public class TrafficMap extends MapActivity implements LocationListener {
 		protected void onPostExecute(Boolean result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
+			tvUpVote.setText(curReport.getVoteUp() + "");
+			tvDownVote.setText(curReport.getVoteDown() + "");
 			setProgressBarIndeterminateVisibility(false);
 			if (result) {
 
@@ -673,11 +721,12 @@ public class TrafficMap extends MapActivity implements LocationListener {
 
 					mVoteSetGetter.vote(mApplication.getUser(),
 							curReport.getCautionID(), true);
+					Log.i(TAG, "vote Up");
 
 				} else if (params[0].equals(IncidentDetailActivity.DOWNVOTE)) {
 					mVoteSetGetter.vote(mApplication.getUser(),
 							curReport.getCautionID(), false);
-
+					Log.i(TAG, "vote Down");
 				}
 
 				return mVoteSetGetter.getVote(curReport.getCautionID());

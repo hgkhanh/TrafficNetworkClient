@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,7 +26,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -234,7 +234,9 @@ public class IncidentDetailActivity extends Activity {
 				conn.setDoInput(true);
 				conn.connect();
 				InputStream is = conn.getInputStream();
-				tmpBitmapImage = BitmapFactory.decodeStream(is);
+				Options options = new Options();
+				options.inSampleSize = 2;
+				tmpBitmapImage = BitmapFactory.decodeStream(is, null, options);
 				return true;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -457,7 +459,7 @@ public class IncidentDetailActivity extends Activity {
 					fileOutputStream);
 			tmpBitmapImage.compress(CompressFormat.JPEG, 100, bos);
 			try {
-				bos.flush();
+				bos.flush(); 
 				bos.close();
 				fileOutputStream.flush();
 				fileOutputStream.close();

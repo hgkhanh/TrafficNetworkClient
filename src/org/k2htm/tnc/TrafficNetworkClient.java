@@ -12,6 +12,8 @@ public class TrafficNetworkClient extends Application {
 	private ArrayList<Report> reportList;
 	private String fbJson = "";
 	private boolean loginAsFb = false;
+	private boolean showType[] = { true, true, true };
+
 	public static final String TAG = "Application Object";
 
 	public ArrayList<Report> getReportList() {
@@ -22,9 +24,9 @@ public class TrafficNetworkClient extends Application {
 		this.reportList = reportList;
 	}
 
-	public static final int DEFAULT_TIME_FILTER = -1;
+	public static final int DEFAULT_TIME_FILTER = 720;
 	public static final String DEFAULT_USER = "Guest";
-	public static final String ADDRESS = "192.168.0.107:8080";
+	public static final String ADDRESS = "192.168.168.4:8080";
 
 	@Override
 	public void onCreate() {
@@ -65,5 +67,14 @@ public class TrafficNetworkClient extends Application {
 	public void setLoginAsFb(boolean loginAsFb) {
 		this.loginAsFb = loginAsFb;
 	}
+
+	public boolean[] getShowType() {
+		return showType;
+	}
+
+	public void setShowType(boolean[] showType) {
+		this.showType = showType;
+	}
+	
 
 }
