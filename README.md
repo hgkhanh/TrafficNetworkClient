@@ -1,4 +1,4 @@
-traffic-social-network
+MyWay - Scial Network for Traffic
 ======================
 
 Simple network for reporting and keeping track of the traffic condition.
